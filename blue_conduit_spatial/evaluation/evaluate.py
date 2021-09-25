@@ -48,7 +48,7 @@ def hit_rate(y_true, y_pred, threshold=0.5):
             y_hat = y_pred[:,1] > threshold
 
     except:
-        y_hat = y_pred
+        y_hat = y_pred > threshold
     
     output_dict = classification_report(y_true, y_hat, output_dict=True)
     hit_rate = output_dict['1']['precision']

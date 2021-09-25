@@ -26,7 +26,7 @@ def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, savefig=Fa
     """
     fig = plt.figure()
 
-    if isinstance(y_pred, np.ndarray):
+    if isinstance(y_pred, list):
         hit_rate_list = []
         pred_prob_list = []
         for mod in y_pred:
@@ -40,7 +40,7 @@ def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, savefig=Fa
     
     if labels == None:
         labels = ['Hit rate curve']
-    cmap = cm.get_cmap('Dark2', len(hit_rate_list)).colors
+    cmap = cm.get_cmap('Dark2').colors
     
     for i, hr in enumerate(hit_rate_list):
         plt.plot(hr, label=labels[i], color=cmap[i])
@@ -86,7 +86,7 @@ def plot_calibration_curve(y_true, y_pred, n_bins=10, labels=None, savefig=False
     else:
         pred_list = y_pred
     
-    cmap = cm.get_cmap('Dark2', len(pred_list)).colors
+    cmap = cm.get_cmap('Dark2').colors
     for i, mod in enumerate(pred_list):
         true_curve, pred_curve = generate_calibration_curve(y_true, mod, n_bins=10, **kwargs)
         plt.plot(pred_curve, true_curve, color=cmap[i], label=labels[i])
