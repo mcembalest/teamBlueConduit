@@ -1,0 +1,8 @@
+##### Requirements with specific versioning
+numpy >= 1.19
+pandas >= 1.2
+geopandas >= 0.9.0
+xgboost >= 1.4
+scikit-learn >= 0.24
+matplotlib >= 3.3.0
+setuptools
