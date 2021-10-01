@@ -57,7 +57,7 @@ class DistanceMatrix:
             self.parcel_id2idx[df.iloc[i][parcel_id]] = i
             self.idx2parcel_id[i] = df.iloc[i][parcel_id]
             
-            distances = arr2[i:].distance(a)
+            distances = copied_array[i:].distance(a)
             rows_truncated.append(distances)
 
         # rows_truncated will be upper triangular matrix; convert into 
@@ -89,7 +89,7 @@ class DistanceMatrix:
         
         Inputs:
             filepath: relative filepath. Should be a .pkl file
-            
+
         Returns:
             None"""
         output = dict(
