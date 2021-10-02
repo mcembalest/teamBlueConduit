@@ -21,7 +21,6 @@ def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, max_perf=F
         max_perf (bool): indicates whether to plot the 'maximum performance'
                         or the kink in the curve where a perfect model would
                         decrease performance
-        
         figsize: Follows matplotlib fig size convention of (h, w)
         savefig: Boolean indicating whether to save figure
         figname: Figure title
@@ -62,7 +61,7 @@ def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, max_perf=F
         # Maximum performance will be the total number of parcels with lead in the
         # test set.
         tot_w_lead = y_true.sum()
-        plt.axvline(tot_w_lead, ls='dashdotted', label=f"Total w/Lead; Maximum Performance")
+        plt.axvline(tot_w_lead, ls='-.', label=f"Total w/Lead; Maximum Performance", color='k')
     
 
     plt.ylim(0,1)
