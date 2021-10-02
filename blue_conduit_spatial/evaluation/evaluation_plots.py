@@ -3,7 +3,8 @@ from matplotlib import cm
 import numpy as np
 from blue_conduit_spatial.evaluation import generate_calibration_curve, generate_hit_rate_curve
 
-def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, figsize=(10,6), savefig=False, figname=None, figdir=None):
+def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, max_perf=False, 
+                        order_by_prob=False, figsize=(10,6), savefig=False, figname=None, figdir=None):
     """Generates plot of hit rate curve with three potential modes:
         (1) Single model, no prediction probabilities;
         (2) Multiple models, no prediction probabilities;
@@ -17,6 +18,10 @@ def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, figsize=(1
         plot_probs: Boolean for whether to include prediction
                     probabilities in model
         labels: Labels to include if y_pred is a list
+        max_perf (bool): indicates whether to plot the 'maximum performance'
+                        or the kink in the curve where a perfect model would
+                        decrease performance
+        
         figsize: Follows matplotlib fig size convention of (h, w)
         savefig: Boolean indicating whether to save figure
         figname: Figure title
@@ -53,6 +58,13 @@ def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, figsize=(1
     else:
         plt.ylabel(f"Cumulative Hit Rate")
     
+    if max_perf == True:
+        # Maximum performance will be the total number of parcels with lead in the
+        # test set.
+        tot_w_lead = y_true.sum()
+        plt.axvline(tot_w_lead, ls='dashdotted', label=f"Total w/Lead; Maximum Performance")
+    
+
     plt.ylim(0,1)
     plt.xlabel('Position in sample, order by pred. prob.')
     plt.title("Cumulative Hit Rate Curve by Prediction Probability")
