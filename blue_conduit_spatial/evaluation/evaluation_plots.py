@@ -3,6 +3,33 @@ from matplotlib import cm
 import numpy as np
 from blue_conduit_spatial.evaluation import generate_calibration_curve, generate_hit_rate_curve
 
+#### HELPER FUNCTIONS #####
+def order_by_prob(hit_rates, pred_probs, n=500):
+    """Converts an ordered hit rate to a prediction probabilities
+    
+    Args:
+        hit_rates (array-like): numpy array of hit rates, ordered by prediction probability
+        pred_probs (array-like): array of prediction probabilities, corresponding
+                            to the hit rates
+        n (int): number of points to put into line; optional, default is 500
+    
+    Returns:
+        hit_rate_list: list of hit rates corresponding to each binary class threshold
+        thresholds: ordered thresholds for plotting
+    """
+    # Create thresholds & reverse to get [1., 0.9, 0.8, ...] like pattern
+    thresholds = np.linspace(0, 1, n)[::-1]
+
+    hit_rate_output = []
+    for i in range(1, len(thresholds)):
+        # Find first index of prediction array where threshold is met
+        # Keeps only the prediction probabilities w/prob. > threshold
+        idx = np.where(pred_probs > thresholds[i])[0][-1]
+        hit_rate_output.append(hit_rates[idx])
+    
+    return np.array(hit_rate_output), thresholds[1:]
+
+
 def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, max_perf=False, 
                         order_by_prob=False, figsize=(10,6), savefig=False, figname=None, figdir=None):
     """Generates plot of hit rate curve with three potential modes:
