@@ -3,7 +3,7 @@ from matplotlib import cm
 import numpy as np
 from blue_conduit_spatial.evaluation import generate_calibration_curve, generate_hit_rate_curve
 
-def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, savefig=False, figname=None, figdir=None):
+def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, figsize=(10,6), savefig=False, figname=None, figdir=None):
     """Generates plot of hit rate curve with three potential modes:
         (1) Single model, no prediction probabilities;
         (2) Multiple models, no prediction probabilities;
@@ -17,6 +17,7 @@ def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, savefig=Fa
         plot_probs: Boolean for whether to include prediction
                     probabilities in model
         labels: Labels to include if y_pred is a list
+        figsize: Follows matplotlib fig size convention of (h, w)
         savefig: Boolean indicating whether to save figure
         figname: Figure title
         figdir: Directory to save figure.
@@ -24,7 +25,7 @@ def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, savefig=Fa
     Returns:
         None
     """
-    fig = plt.figure()
+    fig = plt.figure(figsize=figsize)
 
     if isinstance(y_pred, list):
         hit_rate_list = []
@@ -62,7 +63,7 @@ def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, savefig=Fa
     else:
         plt.show()
 
-def plot_calibration_curve(y_true, y_pred, n_bins=10, labels=None, savefig=False, figname=None, figdir=None, **kwargs):
+def plot_calibration_curve(y_true, y_pred, n_bins=10, labels=None, figsize=(10,6), savefig=False, figname=None, figdir=None, **kwargs):
     """Plots probability calibration curve for various number of model results
 
     Args:
@@ -71,11 +72,12 @@ def plot_calibration_curve(y_true, y_pred, n_bins=10, labels=None, savefig=False
                 a single model outcomes
         n_bins: Number of bins to discretize for each model
         labels: Labels to include if y_pred is a list
+        figsize: Follows matplotlib figsize directions
         savefig: Boolean indicating whether to save figure
         figname: Figure title
         figdir: Directory to save figure.
     """
-    fig = plt.figure()
+    fig = plt.figure(figsize=figsize)
     if labels == None:
         labels = ['Model']
     elif type(labels) == str:
