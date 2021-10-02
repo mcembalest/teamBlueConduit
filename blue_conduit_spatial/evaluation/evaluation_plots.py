@@ -4,7 +4,7 @@ import numpy as np
 from blue_conduit_spatial.evaluation import generate_calibration_curve, generate_hit_rate_curve
 
 #### HELPER FUNCTIONS #####
-def order_by_prob(hit_rates, pred_probs, n=500):
+def sample_num_to_prob(hit_rates, pred_probs, n=500):
     """Converts an ordered hit rate to a prediction probabilities
     
     Args:
@@ -24,7 +24,10 @@ def order_by_prob(hit_rates, pred_probs, n=500):
     for i in range(1, len(thresholds)):
         # Find first index of prediction array where threshold is met
         # Keeps only the prediction probabilities w/prob. > threshold
-        idx = np.where(pred_probs > thresholds[i])[0][-1]
+        try:
+            idx = np.where(pred_probs > thresholds[i])[0][-1]
+        except:
+            idx = 0
         hit_rate_output.append(hit_rates[idx])
     
     return np.array(hit_rate_output), thresholds[1:]
@@ -58,24 +61,34 @@ def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, max_perf=F
     """
     fig = plt.figure(figsize=figsize)
 
-    if isinstance(y_pred, list):
-        hit_rate_list = []
-        pred_prob_list = []
-        for mod in y_pred:
-            hit_rates, pred_probs = generate_hit_rate_curve(y_true, mod)
-            hit_rate_list.append(hit_rates)
-            pred_prob_list.append(pred_probs)
-    else:
-        hit_rates, pred_probs = generate_hit_rate_curve(y_true, y_pred)
-        hit_rate_list = [hit_rates]
-        pred_prob_list = [pred_probs]
-    
+    # Handle non-list instances of the predictions
+    if not isinstance(y_pred, list):
+        y_pred = [y_pred]
+
+    hit_rate_list = []
+    pred_prob_list = []
+    for mod in y_pred:
+        hit_rates, pred_probs = generate_hit_rate_curve(y_true, mod)
+
+        # If ordering by probability; set up thresholds
+        if order_by_prob == True:
+            hit_rates, xs = sample_num_to_prob(hit_rates, pred_probs, n=500)
+            plt.xlabel(f"Classification threshold")
+            plt.title("Cumulative Hit Rate Curve by Classification Threshold")
+            plt.xlim(1, 0)
+        else:
+            xs = np.arange(len(hit_rates))
+            plt.xlabel('Position in sample, order by pred. prob.')
+            plt.title("Cumulative Hit Rate Curve by Prediction Probability")
+        hit_rate_list.append(hit_rates)
+        pred_prob_list.append(pred_probs)
+
     if labels == None:
         labels = ['Hit rate curve']
     cmap = cm.get_cmap('Dark2').colors
     
     for i, hr in enumerate(hit_rate_list):
-        plt.plot(hr, label=labels[i], color=cmap[i])
+        plt.plot(xs, hr, label=labels[i], color=cmap[i])
     
     if plot_probs == True:
         for i, pp in enumerate(pred_prob_list):
@@ -90,10 +103,7 @@ def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, max_perf=F
         tot_w_lead = y_true.sum()
         plt.axvline(tot_w_lead, ls='-.', label=f"Total w/Lead; Maximum Performance", color='k')
     
-
     plt.ylim(0,1)
-    plt.xlabel('Position in sample, order by pred. prob.')
-    plt.title("Cumulative Hit Rate Curve by Prediction Probability")
     plt.legend()
 
     if savefig == True:
