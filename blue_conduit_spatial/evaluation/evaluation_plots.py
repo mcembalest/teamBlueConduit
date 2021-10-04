@@ -3,7 +3,38 @@ from matplotlib import cm
 import numpy as np
 from blue_conduit_spatial.evaluation import generate_calibration_curve, generate_hit_rate_curve
 
-def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, savefig=False, figname=None, figdir=None):
+#### HELPER FUNCTIONS #####
+def sample_num_to_prob(hit_rates, pred_probs, n=500):
+    """Converts an ordered hit rate to a prediction probabilities
+    
+    Args:
+        hit_rates (array-like): numpy array of hit rates, ordered by prediction probability
+        pred_probs (array-like): array of prediction probabilities, corresponding
+                            to the hit rates
+        n (int): number of points to put into line; optional, default is 500
+    
+    Returns:
+        hit_rate_list: list of hit rates corresponding to each binary class threshold
+        thresholds: ordered thresholds for plotting
+    """
+    # Create thresholds & reverse to get [1., 0.9, 0.8, ...] like pattern
+    thresholds = np.linspace(0, 1, n)[::-1]
+
+    hit_rate_output = []
+    for i in range(1, len(thresholds)):
+        # Find first index of prediction array where threshold is met
+        # Keeps only the prediction probabilities w/prob. > threshold
+        try:
+            idx = np.where(pred_probs > thresholds[i])[0][-1]
+        except:
+            idx = 0
+        hit_rate_output.append(hit_rates[idx])
+    
+    return np.array(hit_rate_output), thresholds[1:]
+
+
+def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, max_perf=False, 
+                        order_by_prob=False, figsize=(10,6), savefig=False, figname=None, figdir=None):
     """Generates plot of hit rate curve with three potential modes:
         (1) Single model, no prediction probabilities;
         (2) Multiple models, no prediction probabilities;
@@ -17,6 +48,10 @@ def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, savefig=Fa
         plot_probs: Boolean for whether to include prediction
                     probabilities in model
         labels: Labels to include if y_pred is a list
+        max_perf (bool): indicates whether to plot the 'maximum performance'
+                        or the kink in the curve where a perfect model would
+                        decrease performance
+        figsize: Follows matplotlib fig size convention of (h, w)
         savefig: Boolean indicating whether to save figure
         figname: Figure title
         figdir: Directory to save figure.
@@ -24,26 +59,36 @@ def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, savefig=Fa
     Returns:
         None
     """
-    fig = plt.figure()
+    fig = plt.figure(figsize=figsize)
 
-    if isinstance(y_pred, list):
-        hit_rate_list = []
-        pred_prob_list = []
-        for mod in y_pred:
-            hit_rates, pred_probs = generate_hit_rate_curve(y_true, mod)
-            hit_rate_list.append(hit_rates)
-            pred_prob_list.append(pred_probs)
-    else:
-        hit_rates, pred_probs = generate_hit_rate_curve(y_true, y_pred)
-        hit_rate_list = [hit_rates]
-        pred_prob_list = [pred_probs]
-    
+    # Handle non-list instances of the predictions
+    if not isinstance(y_pred, list):
+        y_pred = [y_pred]
+
+    hit_rate_list = []
+    pred_prob_list = []
+    for mod in y_pred:
+        hit_rates, pred_probs = generate_hit_rate_curve(y_true, mod)
+
+        # If ordering by probability; set up thresholds
+        if order_by_prob == True:
+            hit_rates, xs = sample_num_to_prob(hit_rates, pred_probs, n=500)
+            plt.xlabel(f"Classification threshold")
+            plt.title("Cumulative Hit Rate Curve by Classification Threshold")
+            plt.xlim(1, 0)
+        else:
+            xs = np.arange(len(hit_rates))
+            plt.xlabel('Position in sample, order by pred. prob.')
+            plt.title("Cumulative Hit Rate Curve by Prediction Probability")
+        hit_rate_list.append(hit_rates)
+        pred_prob_list.append(pred_probs)
+
     if labels == None:
         labels = ['Hit rate curve']
     cmap = cm.get_cmap('Dark2').colors
     
     for i, hr in enumerate(hit_rate_list):
-        plt.plot(hr, label=labels[i], color=cmap[i])
+        plt.plot(xs, hr, label=labels[i], color=cmap[i])
     
     if plot_probs == True:
         for i, pp in enumerate(pred_prob_list):
@@ -52,9 +97,13 @@ def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, savefig=Fa
     else:
         plt.ylabel(f"Cumulative Hit Rate")
     
+    if max_perf == True:
+        # Maximum performance will be the total number of parcels with lead in the
+        # test set.
+        tot_w_lead = y_true.sum()
+        plt.axvline(tot_w_lead, ls='-.', label=f"Total w/Lead; Maximum Performance", color='k')
+    
     plt.ylim(0,1)
-    plt.xlabel('Position in sample, order by pred. prob.')
-    plt.title("Cumulative Hit Rate Curve by Prediction Probability")
     plt.legend()
 
     if savefig == True:
@@ -62,7 +111,7 @@ def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, savefig=Fa
     else:
         plt.show()
 
-def plot_calibration_curve(y_true, y_pred, n_bins=10, labels=None, savefig=False, figname=None, figdir=None, **kwargs):
+def plot_calibration_curve(y_true, y_pred, n_bins=10, labels=None, figsize=(10,6), savefig=False, figname=None, figdir=None, **kwargs):
     """Plots probability calibration curve for various number of model results
 
     Args:
@@ -71,11 +120,12 @@ def plot_calibration_curve(y_true, y_pred, n_bins=10, labels=None, savefig=False
                 a single model outcomes
         n_bins: Number of bins to discretize for each model
         labels: Labels to include if y_pred is a list
+        figsize: Follows matplotlib figsize directions
         savefig: Boolean indicating whether to save figure
         figname: Figure title
         figdir: Directory to save figure.
     """
-    fig = plt.figure()
+    fig = plt.figure(figsize=figsize)
     if labels == None:
         labels = ['Model']
     elif type(labels) == str:
