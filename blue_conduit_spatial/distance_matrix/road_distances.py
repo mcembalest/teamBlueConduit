@@ -1,6 +1,7 @@
 import requests
 from blue_conduit_spatial.utilities import *
 import geopandas as gpd
+import numpy as np
 
 class RoadDistanceMatrix:
     def __init__(self, N, df):
