@@ -20,7 +20,7 @@ def jared_preprocessing(sl_df, cols_metadata):
     Xdata = data.drop(['pid', 'sl_private_type', 'sl_public_type', 'dangerous'], axis = 1)
 
     # Build target.  Each 'dangerous' is True when sl_private_type OR sl_public_type contain lead.
-    Ydata = data[['sl_private_type', 'sl_public_type', 'dangerous']]
+    Ydata =  data[target_cols]#data[['sl_private_type', 'sl_public_type', 'dangerous']]
 
     # Fill missing data
     Xdata = Xdata.fillna(-1)
