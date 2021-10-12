@@ -2,6 +2,9 @@ import numpy as np
 import tensorflow as tf
 
 
+# TODO:
+# CAN THE ADJACENCY MATRIX ALSO TAKE WEIGHTED
+
 def gnn_layer(fts, adj, transform, activation):
 	seq_fts = transform(fts)
 	ret_fts = tf.matmul(np.asmatrix(adj), np.asmatrix(seq_fts))
@@ -56,8 +59,8 @@ class GNN:
 			grads = tape.gradient(loss, variables)
 			optimizer.apply_gradients(zip(grads, variables))
 
-			val_accuracy = masked_accuracy(logits, labels, self.val_mask)
-			test_accuracy = masked_accuracy(logits, labels, self.test_mask)
+			val_accuracy = masked_accuracy(logits, self.labels, self.val_mask)
+			test_accuracy = masked_accuracy(logits, self.labels, self.test_mask)
 
 			if val_accuracy > best_accuracy:
 				best_accuracy = val_accuracy

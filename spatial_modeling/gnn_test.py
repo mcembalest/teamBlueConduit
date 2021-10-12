@@ -1,4 +1,5 @@
 from gnn import GNN
+import numpy as np
 
 
 adj = np.array([[1,1,1,0,0,1,0,1],
