@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt 
 from matplotlib import cm
 import numpy as np
+from sklearn.metrics import precision_recall_curve, auc
+
 from blue_conduit_spatial.evaluation import generate_calibration_curve, generate_hit_rate_curve
 
 #### HELPER FUNCTIONS #####
@@ -146,6 +148,61 @@ def plot_calibration_curve(y_true, y_pred, n_bins=10, labels=None, figsize=(10,6
     plt.ylim(0, 1)
     plt.xlabel('Mean predicted probability success')
     plt.ylabel('Fraction digs successful')
+    plt.legend()
+
+    if savefig == True:
+        plt.savefig(figdir + figname)
+    else:
+        plt.show()
+        
+def plot_pr_curve(y_true, y_pred, labels=None,
+                  figsize=(10,6), dpi=90, savefig=False, figname=None, figdir=None):
+    """Generates precisio-recall curve plot for single or multiple models
+
+    Args:
+        y_true: Ground truth outcomes for dangerous/not dangerous
+        y_pred: Either a list of model prediction probabilities or 
+                a single model outcomes
+        labels: Labels to include if y_pred is a list
+        dpi: matplotlib dpi
+        figsize: Follows matplotlib fig size convention of (h, w)
+        savefig: Boolean indicating whether to save figure
+        figname: Figure title
+        figdir: Directory to save figure.
+
+    Returns:
+        None
+    """
+    fig = plt.figure(figsize=figsize, dpi=dpi)
+
+    # Handle non-list instances of the predictions
+    if not isinstance(y_pred, list):
+        y_pred = [y_pred]
+
+    prec_list = []
+    recall_list = []
+    auc_list = []
+    
+    for mod in y_pred:
+        mod = np.array(mod).reshape(-1)
+        prec_i, recall_i, thres_i = precision_recall_curve(y_true, mod)
+        prec_list.append(prec_i)
+        recall_list.append(recall_i)
+        
+        auc_i = auc(recall_i, prec_i)
+        auc_list.append(auc_i)
+
+    if labels == None:
+        labels = [f'Precision-recall {i}' for i in range(len(prec_list))]
+    cmap = cm.get_cmap('Dark2').colors
+    
+    for prec_, recall_, auc_, label_, color_ in zip(prec_list, recall_list, auc_list, labels, cmap):
+        label_ = label_ + f' AUC:{auc_:.2f}'
+        plt.plot(recall_, prec_, label=label_, color=color_)
+    
+    plt.title('Precision-Recall curve for lead predictions')
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
     plt.legend()
 
     if savefig == True:
