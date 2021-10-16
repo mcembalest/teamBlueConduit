@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
 import geopandas as gpd
+import numpy as np
 import os
 import pandas as pd
 from sklearn.model_selection import train_test_split, GroupShuffleSplit
@@ -15,7 +16,10 @@ def jared_preprocessing(sl_df, cols_metadata):
 
     # Only keep labelled data
     data = data[~pd.isnull(data.dangerous)].reset_index(drop=True)
-
+    
+    # Keep track of pid
+    pid = data['pid']
+    
     # Drop everything except target from training data
     Xdata = data.drop(['pid', 'sl_private_type', 'sl_public_type', 'dangerous'], axis = 1)
 
@@ -32,56 +36,73 @@ def jared_preprocessing(sl_df, cols_metadata):
     groups = Xdata['PRECINCT']
     Xdata = Xdata.drop('PRECINCT', axis=1)
     
-    return Xdata, Ydata, groups
-
-def split_data(Xdata, Ydata, groups, n_splits=3, train_size=.75, random_state=42):
-    gss = GroupShuffleSplit(n_splits=n_splits, train_size=train_size, random_state=random_state)
-
-    for train_idx, test_idx in gss.split(Xdata, Ydata, groups):
-        train_index = train_idx
-        test_index = test_idx
-        break
-
-    Xtrain = Xdata.loc[train_index]
-    Xtest = Xdata.loc[test_index]
-    Ytrain = Ydata.loc[train_index.tolist()]
-    Ytest = Ydata.loc[test_index.tolist()]
+    return Xdata, Ydata, groups, pid
     
-    return Xtrain, Xtest, Ytrain, Ytest
+def split_index(Xdata, Ydata, groups, n_splits=5, train_size_list=None, random_state=42):
+    '''
+    Split in `n_splits` train and test indices based on `PRECINT` groups, 
+    for multiple `train_size` in `train_size_list`.
+    '''
+    
+    assert isinstance(train_size_list, (list, tuple, np.ndarray))
+    assert isinstance(train_size_list[0], float)
+    
+    train_idx_data = {}
+    test_idx_data = {}
 
-def build_datasets(data_raw_path, save_dir=None, n_splits=3, train_size=.75, random_state=42):
+    for train_size in train_size_list:
+        gss = GroupShuffleSplit(n_splits=n_splits, train_size=train_size, random_state=random_state)
+        train_idx, test_idx = list(zip(*gss.split(Xdata, Ydata, groups)))
+        train_idx = np.array(train_idx, dtype=object)
+        test_idx = np.array(test_idx, dtype=object)
+
+        train_idx_data[f'{train_size}'] = train_idx
+        test_idx_data[f'{train_size}'] = test_idx
+        
+    return train_idx_data, test_idx_data
+
+def build_datasets(data_raw_path, save_dir=None, n_splits=3, train_size_list=None, random_state=42):
     cols_metadata = cols_metadata_dict(save_dir)
     col_name_dictionary = cols_metadata['col_name_dictionary']
     
+    # Default list of `train_size`.
+    if train_size_list is None:
+        train_size_list = np.round(np.linspace(0,1, 11)[1:-1], 1)
+    
     sl_df = gpd.read_file(data_raw_path)
     sl_df = sl_df.rename(col_name_dictionary, axis=1)
-    Xdata, Ydata, groups = jared_preprocessing(sl_df, cols_metadata)
-    Xtrain, Xtest, Ytrain, Ytest = split_data(Xdata, Ydata, groups, n_splits, train_size, random_state)
+    Xdata, Ydata, groups, pid = jared_preprocessing(sl_df, cols_metadata)
+    train_idx, test_idx = split_index(Xdata, Ydata, groups, n_splits, train_size_list, random_state)
     
     if not save_dir is None:
         os.makedirs(save_dir, exist_ok=True) 
-        Xtrain_path = f'{save_dir}/Xtrain.csv'
-        Xtest_path = f'{save_dir}/Xtest.csv'
-        Ytrain_path = f'{save_dir}/Ytrain.csv'
-        Ytest_path = f'{save_dir}/Ytest.csv'    
+        
+        Xdata_path = f'{save_dir}/Xdata.csv'
+        Ydata_path = f'{save_dir}/Ydata.csv'
+        train_idx_path = f'{save_dir}/train_index.npz'
+        test_idx_path = f'{save_dir}/test_index.npz'
+        pid_path = f'{save_dir}/pid.csv'
     
-        for df, path in zip([Xtrain, Xtest, Ytrain, Ytest],[Xtrain_path, Xtest_path, Ytrain_path, Ytest_path]):
+        for df, path in zip([Xdata, Ydata, pid],[Xdata_path, Ydata_path, pid_path]):
             df.to_csv(path, index=False)
             
-    return Xtrain, Xtest, Ytrain, Ytest
+        np.savez(train_idx_path, **train_idx)
+        np.savez(test_idx_path, **test_idx)
+            
+    return Xdata, Ydata, pid, train_idx, test_idx
 
 def load_datasets(load_dir):
-    Xtrain_path = f'{load_dir}/Xtrain.csv'
-    Xtest_path = f'{load_dir}/Xtest.csv'
-    Ytrain_path = f'{load_dir}/Ytrain.csv'
-    Ytest_path = f'{load_dir}/Ytest.csv'    
+    Xdata_path = f'{load_dir}/Xdata.csv'
+    Ydata_path = f'{load_dir}/Ydata.csv'
+    train_idx_path = f'{load_dir}/train_index.npz'
+    test_idx_path = f'{load_dir}/test_index.npz'
+    pid_path = f'{load_dir}/pid.csv'
     
-    Xtrain = pd.read_csv(Xtrain_path)
-    Xtest = pd.read_csv(Xtest_path)
-    Ytrain = pd.read_csv(Ytrain_path)
-    Ytest = pd.read_csv(Ytest_path)
+    Xdata = pd.read_csv(Xdata_path)
+    Ydata = pd.read_csv(Ydata_path)
+    pid = pd.read_csv(pid_path)
+    train_idx = np.load(train_idx_path, allow_pickle=True)
+    test_idx = np.load(test_idx_path, allow_pickle=True)
     
-    return Xtrain, Xtest, Ytrain, Ytest
+    return Xdata, Ydata, pid, train_idx, test_idx
     
-if __name__=='__main__':
-    Xtrain, Xtest, Ytrain, Ytest = build_datasets(data_raw_path, save_dir=save_dir)
