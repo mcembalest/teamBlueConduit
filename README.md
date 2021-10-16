@@ -5,6 +5,30 @@ capstone project for Harvard IACS AC297r
 
 ```pip install .```
 
+# Data
+
+## Data folder structure
+
+```
+.
+├── README.md
+├── processed
+│   ├── Xdata.csv
+│   ├── Ydata.csv
+│   ├── cols_metadata.json
+│   ├── pid.csv
+│   ├── test_index.npz
+│   └── train_index.npz
+├── raw
+│   └── flint_sl_materials
+│       ├── flint_sl_materials.cpg
+│       ├── flint_sl_materials.dbf
+│       ├── flint_sl_materials.prj
+│       ├── flint_sl_materials.shp
+│       └── flint_sl_materials.shx
+└── road_distances.npz
+```
+
 ## Build datasets
 ```build_datasets(data_raw_path, save_dir=None, n_splits=3, train_size_list=None, random_state=42)```
 
@@ -42,6 +66,8 @@ train_idx['0.1']
            array([ 2893,  2912,  2919, ..., 26852, 26857, 26862])],
            dtype=object)
 ```
+
+# Plots
 
 ## Plot precision-recall curve
 
