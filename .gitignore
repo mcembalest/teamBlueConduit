@@ -1,5 +1,6 @@
 # Data Files
 data/
+*.npz
 
 Pipfile*
 
@@ -141,3 +142,5 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+
