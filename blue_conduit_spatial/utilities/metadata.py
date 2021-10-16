@@ -37,7 +37,7 @@ col_name_dictionary = {'pid': 'pid', 'Property Z': 'Property Zip Code', 'Owner T
                        'dangerous': 'dangerous', 'geometry': 'geometry'}
 
 drop_cols = ['known_private_sl', 'known_public_sl', 'hydrovac', 'created_at', 'source',
-             'hv_visit', 'sl_visit', 'replaced', 'geometry']
+             'hv_visit', 'sl_visit', 'replaced', 'geometry', 'Latitude', 'Longitude']
 
 dummy_cols = ['Property Zip Code', 'Owner Type', 'Residential Building Style', 'Homestead', 'Building Storeys',
               'Rental', 'Use Type', 'Prop Class', 'Old Prop class', 'USPS Vacancy', 'Housing Condition 2012',
@@ -45,7 +45,7 @@ dummy_cols = ['Property Zip Code', 'Owner Type', 'Residential Building Style', '
               'Hydrant Type', 'SL_Type', 'SL_Type2', 'DRAFT Zone', 'Last_Test', 'SL_private_inspection', 'Ward',
               'CENTRACT', 'CENBLOCK']
 
-target_cols = ['pid', 'sl_private_type', 'sl_public_type', 'dangerous']
+target_cols = ['sl_private_type', 'sl_public_type', 'dangerous']
 
 def cols_metadata_dict(save_dir=None):
     cols_metadata = {
