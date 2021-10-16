@@ -10,23 +10,25 @@ capstone project for Harvard IACS AC297r
 ## Data folder structure
 
 ```
-.
-├── README.md
-├── processed
-│   ├── Xdata.csv
-│   ├── Ydata.csv
-│   ├── cols_metadata.json
-│   ├── pid.csv
-│   ├── test_index.npz
-│   └── train_index.npz
-├── raw
-│   └── flint_sl_materials
-│       ├── flint_sl_materials.cpg
-│       ├── flint_sl_materials.dbf
-│       ├── flint_sl_materials.prj
-│       ├── flint_sl_materials.shp
-│       └── flint_sl_materials.shx
-└── road_distances.npz
+...
+├── data
+│   ├── README.md
+│   ├── processed
+│   │   ├── Xdata.csv
+│   │   ├── Ydata.csv
+│   │   ├── cols_metadata.json
+│   │   ├── pid.csv
+│   │   ├── test_index.npz
+│   │   └── train_index.npz
+│   ├── raw
+│   │   └── flint_sl_materials
+│   │       ├── flint_sl_materials.cpg
+│   │       ├── flint_sl_materials.dbf
+│   │       ├── flint_sl_materials.prj
+│   │       ├── flint_sl_materials.shp
+│   │       └── flint_sl_materials.shx
+│   └── road_distances.npz
+...
 ```
 
 ## Build datasets
