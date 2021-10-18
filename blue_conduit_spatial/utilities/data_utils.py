@@ -7,7 +7,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split, GroupShuffleSplit
 from .metadata import cols_metadata_dict
 
-def jared_preprocessing(sl_df, cols_metadata):
+def blue_conduit_preprocessing(sl_df, cols_metadata):
     drop_cols = cols_metadata['drop_cols']
     dummy_cols = cols_metadata['dummy_cols']
     target_cols = cols_metadata['target_cols']
@@ -15,13 +15,14 @@ def jared_preprocessing(sl_df, cols_metadata):
     data = sl_df.drop(drop_cols, axis = 1)
 
     # Only keep labelled data
+    data = data[~pd.isnull(sl_df['Longitude'])]
     data = data[~pd.isnull(data.dangerous)].reset_index(drop=True)
     
     # Keep track of pid
-    pid = data['pid']
+    pid = data[['pid', 'Latitude', 'Longitude']]
     
     # Drop everything except target from training data
-    Xdata = data.drop(['pid', 'sl_private_type', 'sl_public_type', 'dangerous'], axis = 1)
+    Xdata = data.drop(['pid', 'sl_private_type', 'sl_public_type', 'dangerous', 'Latitude', 'Longitude'], axis = 1)
 
     # Build target.  Each 'dangerous' is True when sl_private_type OR sl_public_type contain lead.
     Ydata =  data[target_cols]#data[['sl_private_type', 'sl_public_type', 'dangerous']]
@@ -71,7 +72,7 @@ def build_datasets(data_raw_path, save_dir=None, n_splits=3, train_size_list=Non
     
     sl_df = gpd.read_file(data_raw_path)
     sl_df = sl_df.rename(col_name_dictionary, axis=1)
-    Xdata, Ydata, groups, pid = jared_preprocessing(sl_df, cols_metadata)
+    Xdata, Ydata, groups, pid = blue_conduit_preprocessing(sl_df, cols_metadata)
     train_idx, test_idx = split_index(Xdata, Ydata, groups, n_splits, train_size_list, random_state)
     
     if not save_dir is None:
@@ -105,4 +106,10 @@ def load_datasets(load_dir):
     test_idx = np.load(test_idx_path, allow_pickle=True)
     
     return Xdata, Ydata, pid, train_idx, test_idx
+
+if __name__ == '__main__':
+    data_dir = '../../data'
+    data_raw_path = f'{data_dir}/raw/flint_sl_materials/'
+    save_dir = f'{data_dir}/processed'
+    build_datasets(data_raw_path, save_dir=None, n_splits=3, train_size_list=None, random_state=42)
     
