@@ -1,6 +1,8 @@
 # teamBlueConduit
 capstone project for Harvard IACS AC297r
 
+Team Members: Javiera Astudillo, Max Cembalest, Kevin Hare, and Dashiell Young-Saver
+
 # Libraries setup
 
 ```pip install .```
@@ -8,6 +10,8 @@ capstone project for Harvard IACS AC297r
 # Data
 
 ## Data folder structure
+
+To reduce space locally, we have utilized a consistent structure of the data folders. Below is a brief tutorial on how to replicate the data directories. First, the following directory structure must be created:
 
 ```
 ...
@@ -20,6 +24,8 @@ capstone project for Harvard IACS AC297r
 │   │   ├── pid.csv
 │   │   ├── test_index.npz
 │   │   └── train_index.npz
+|   |   └── road_distances.npz
+|   |   └── haversine_distances.npz
 │   ├── raw
 │   │   └── flint_sl_materials
 │   │       ├── flint_sl_materials.cpg
@@ -27,21 +33,26 @@ capstone project for Harvard IACS AC297r
 │   │       ├── flint_sl_materials.prj
 │   │       ├── flint_sl_materials.shp
 │   │       └── flint_sl_materials.shx
-│   └── road_distances.npz
+│   ├── predictions
+│   │   ├── pred_probs_train.npz
+│   │   ├── pred_probs_test.npz
 ...
 ```
+All files can be replicated locally, though the distance matrices are > 5GB and thus were handled via Google Colab.
 
 ## Build datasets
 ```build_datasets(data_raw_path, save_dir=None, n_splits=3, train_size_list=None, random_state=42)```
 
 **Example**
 
+Note: the following code can be executed in a Jupyter Notebook, or alternatively by navigating to `blue_conduit_spatial/utilities` and running `python data_utils.py`, where the default behavior will mirror the directories below.
+
 ```
 from blue_conduit_spatial.utilities import build_datasets, load_datasets
 
 data_dir = '../data'
 data_raw_path = f'{data_dir}/raw/flint_sl_materials/'
-save_dir = f'{data_dir}/test_dir'
+save_dir = f'{data_dir}/processed'
 
 Xdata, Ydata, pid, train_idx, test_idx = build_datasets(data_raw_path, save_dir=save_dir)
 ```
@@ -55,7 +66,7 @@ Xdata, Ydata, pid, train_idx, test_idx = build_datasets(data_raw_path, save_dir=
 from blue_conduit_spatial.utilities import build_datasets, load_datasets
 
 data_dir = '../data'
-load_dir = f'{data_dir}/test_dir'
+load_dir = f'{data_dir}/processed'
 
 Xdata, Ydata, pid, train_idx, test_idx = load_datasets(load_dir)
 
@@ -68,6 +79,16 @@ train_idx['0.1']
            array([ 2893,  2912,  2919, ..., 26852, 26857, 26862])],
            dtype=object)
 ```
+
+# Modeling
+
+## Blue Conduit Baseline
+To fit the Blue Conduit baseline XGBoost models, we can run the following command. This requires the directory structure above, in particular having run or downloaded the `predictions` directory.
+
+- Navigate to `blue_conduit_spatial/modeling`
+- Execute `python blue_conduit_baseline.py`
+
+Taken together, these commands will generate the `pred_probs_train.npz` and `pred_probs_test.npz` files. These correspond exactly to the indices described in `train_index.npz` and `test_index.npz`.
 
 # Plots
 
