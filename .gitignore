@@ -1,6 +1,9 @@
 # Data Files
-data/
+data/raw/
 *.npz
+*.csv
+data/*.json
+data/processed/
 
 Pipfile*
 
