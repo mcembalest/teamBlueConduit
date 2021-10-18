@@ -37,7 +37,7 @@ col_name_dictionary = {'pid': 'pid', 'Property Z': 'Property Zip Code', 'Owner T
                        'dangerous': 'dangerous', 'geometry': 'geometry'}
 
 drop_cols = ['known_private_sl', 'known_public_sl', 'hydrovac', 'created_at', 'source',
-             'hv_visit', 'sl_visit', 'replaced', 'geometry', 'Latitude', 'Longitude']
+             'hv_visit', 'sl_visit', 'replaced', 'geometry']
 
 dummy_cols = ['Property Zip Code', 'Owner Type', 'Residential Building Style', 'Homestead', 'Building Storeys',
               'Rental', 'Use Type', 'Prop Class', 'Old Prop class', 'USPS Vacancy', 'Housing Condition 2012',
