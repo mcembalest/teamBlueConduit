@@ -69,7 +69,7 @@ class ServiceLineDiffusion:
         # Initialize the lead values & find weighted average of neighbor lead values
         lead_vals = np.array([self._get_lead_value(idx) for idx in range(self.graph.shape[0])]).flatten()
         if verbose:
-          print(f"{log_loss(Ytest, lead_vals[self.test_indices]):0.2f}")
+          print(f"{log_loss(self.Ytest, lead_vals[self.test_indices]):0.2f}")
 
         for i in range(n_iter):
             lead_vals = self.diffusion_step(lead_vals)
