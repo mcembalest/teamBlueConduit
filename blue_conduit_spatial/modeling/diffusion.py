@@ -169,7 +169,7 @@ class ServiceLineDiffusion:
         if idx in self.train_indices:
             return self.Ytrain[self._idx2trainidx(idx)]
         else:
-            return self.curr_pred[self._idx2testidx(idx)]
+            return self.curr_test_pred[self._idx2testidx(idx)]
 
 
     
