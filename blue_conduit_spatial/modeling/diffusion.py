@@ -16,8 +16,11 @@ from scipy.sparse import csr_matrix
 
 import networkx as nx 
 
-# Set random seed
+# Set random seed & Visual Globals
 np.random.seed(297)
+LAT_MIN, LAT_MAX = 42.97, 43.09
+LON_MIN, LON_MAX = -83.75, -83.62
+
 
 class ServiceLineDiffusion:
     """Note: graph should be a (N, N) numpy array
@@ -46,6 +49,8 @@ class ServiceLineDiffusion:
         self.curr_test_pred = self.Ytest_pred.copy() # Initialize 'current' prediction as baseline test
         self.curr_train_pred = self.Ytrain.copy() # Initialize 'current' prediction as baseline test
 
+        # Set aside separate all_predictions for plotting capabilities
+        self.all_predictions = []
         self.lat_long_df = lat_long_df
 
     def fit(self, n_iter=1, neighbor_fn=None, neighbor_params=None, distance_function=None, verbose=False):
@@ -69,17 +74,18 @@ class ServiceLineDiffusion:
         # Initialize the lead values & find weighted average of neighbor lead values
         lead_vals = np.array([self._get_lead_value(idx) for idx in range(self.graph.shape[0])]).flatten()
         if verbose:
-          print(f"{log_loss(self.Ytest, lead_vals[self.test_indices]):0.2f}")
+          print(f"Initial Log Loss: {log_loss(self.Ytest, lead_vals[self.test_indices]):0.2f}")
 
         for i in range(n_iter):
             lead_vals = self.diffusion_step(lead_vals)
 
             if verbose:
-              print(f"{log_loss(self.Ytest, lead_vals[self.test_indices]):0.2f}")
+              print(f"Log Loss at Iteration {i+1}: {log_loss(self.Ytest, lead_vals[self.test_indices]):0.2f}")
 
-            # Set current predictions
-            self.curr_test_pred = lead_vals[self.test_indices]
-            self.curr_train_pred = lead_vals[self.train_indices]
+        # Set current predictions
+        self.curr_test_pred = lead_vals[self.test_indices]
+        self.curr_train_pred = lead_vals[self.train_indices]
+        self.all_predictions = lead_vals
         
         return lead_vals
     
@@ -126,6 +132,48 @@ class ServiceLineDiffusion:
         #else:
         #    return lam * node_val + (1 - lam) * weighted_avg_neighbor_lead[node_idx]
         return lam * node_val + (1 - lam) * weighted_avg_neighbor_lead[node_idx]
+
+
+    def plot_graph(self, fig, ax, title, colorvals=None, bbox = None):
+        """Plotting utility for describing the graph"""
+
+        if colorvals is None:
+            colorvals = self.all_predictions
+
+        g = nx.from_numpy_array(self.graph)
+        # draw nodes with colors
+        graph_pos = {i : self._get_lat_lon(idx) for i, idx in enumerate(subgraph_idx)}
+        nx.draw_networkx_nodes(g, graph_pos, node_color=colorvals, vmin=0,vmax=1,cmap = cm.RdYlGn_r, ax=ax)
+
+        # grab edge weights
+        all_weights = []
+        for (_,_,data) in g.edges(data=True):
+            all_weights.append(data['weight'])
+        unique_weights = list(set(all_weights))
+        
+        # draw weights one at a time
+        for i, weight in enumerate(unique_weights):
+            weighted_edges = np.array([(node1,node2) for (node1,node2,edge_attr) in g.edges(data=True) if edge_attr['weight']==weight])
+            alpha = (1 - weight/max(all_weights)) * 0.5
+            nx.draw_networkx_edges(g, pos=graph_pos, ax=ax, width=5, edgelist=weighted_edges, alpha = alpha)
+
+        # add color scale
+        cb = fig.colorbar(cm.ScalarMappable(norm=Normalize(), cmap=cm.RdYlGn_r), ax=ax)
+        cb.set_label('LEAD value')
+        
+        ax.set_title(title)
+        ax.set_xlabel('Latitude')
+        ax.set_ylabel('Longitude')
+        ax.tick_params(left=True, bottom=True, labelleft=True, labelbottom=True)
+        ax.xaxis.set_major_formatter(FormatStrFormatter('%.3f'))
+        ax.yaxis.set_major_formatter(FormatStrFormatter('%.3f'))
+        limits=ax.axis('on')
+        if bbox is None:
+            ax.set_xlim(LAT_MIN, LAT_MAX)
+            ax.set_ylim(LON_MIN, LON_MAX)
+        else:
+            ax.set_xlim(bbox[0], bbox[1])
+            ax.set_ylim(bbox[2], bbox[3])
         
     @staticmethod
     def graph_Kneighbors(graph, K):
