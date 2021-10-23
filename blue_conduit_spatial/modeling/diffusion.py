@@ -15,10 +15,6 @@ from scipy.sparse import csr_matrix
 
 import networkx as nx 
 
-"""Module that wraps the various spatial diffusion models tested. Relies on graph-based
-methods using NetworkX. Model is graph agnostic. That is, diffusion will work for parcel or
-partition-based methods"""
-
 # Set random seed
 np.random.seed(297)
 
@@ -46,7 +42,8 @@ class ServiceLineDiffusion:
         self.Ytrain = Ytrain
         self.Ytest = Ytest
         self.Ytest_pred = Ytest_pred
-        self.curr_pred = self.Ytest_pred.copy() # Initialize 'current' prediction as baseline test
+        self.curr_test_pred = self.Ytest_pred.copy() # Initialize 'current' prediction as baseline test
+        self.curr_train_pred = self.Ytrain.copy() # Initialize 'current' prediction as baseline test
 
         self.lat_long_df = lat_long_df
 
@@ -77,12 +74,38 @@ class ServiceLineDiffusion:
             lead_vals = self.diffusion_step(lead_vals)
 
             if verbose:
-              print(f"{log_loss(Ytest, lead_vals[self.test_indices]):0.2f}")
+              print(f"{log_loss(self.Ytest, lead_vals[self.test_indices]):0.2f}")
 
-            # Set current test predictions
-            self.curr_pred = lead_vals[self.test_indices]
+            # Set current predictions
+            self.curr_test_pred = lead_vals[self.test_indices]
+            self.curr_train_pred = lead_vals[self.train_indices]
         
         return lead_vals
+    
+    def predict_proba(self, X, mode=None):
+        """Returns probabilities after lead values. Because this is a non-standard "model" and does not
+        truly take a new X value, it uses the shape of X to determine whether to return the training
+        or test predictions
+        
+        Args:
+            - X (pd.DataFrame, np.array): Array of training or test points, used only for its shape
+            - mode (str): One of None, 'train', 'test'. If none, will make decision based on X shape
+        
+        Returns
+            - probs (array): Array of probability of (no lead, lead) in a (N, 2) array to be compliant
+        """
+        if mode == 'train':
+            return np.stack([1-self.curr_train_pred, self.curr_train_pred], axis=1)
+        elif mode == 'test':
+            return np.stack([1-self.curr_test_pred, self.curr_test_pred], axis=1)
+        
+        # Utilize shape if not
+        if X.shape[0] == len(self.curr_test_pred):
+            return self.predict_proba(X, mode='test')
+        elif X.shape[0] == len(self.curr_train_pred):
+            return self.predict_proba(X, mode='train')
+        else:
+            raise AttributeError(f'X passed is not of same shape as either training or test predictions.')
 
     def diffusion_step(self, lead_vals):
         """Takes a single diffusion step. Separated for clean code practices"""
@@ -90,13 +113,18 @@ class ServiceLineDiffusion:
         lead_vals = np.array([self._update_node(node_val, node_idx, weighted_avg_neighbor_lead, self.lam) for node_idx, node_val in enumerate(lead_vals)])
         lead_vals = lead_vals.flatten()
         return lead_vals
+    
+    def reset_graph(self):
+        """Helper method for removing graph when dealing with memory-intensive methods"""
+        self.graph = []
 
     def _update_node(self, node_val, node_idx, weighted_avg_neighbor_lead, lam=0.5):
         """Defines update step for a single node. Can be overwritten, must return between [0,1]"""
-        if node_val in [0., 1.]:
-            return node_val
-        else:
-            return lam * node_val + (1 - lam) * weighted_avg_neighbor_lead[node_idx]
+        #if node_val in [0., 1.]:
+        #    return node_val
+        #else:
+        #    return lam * node_val + (1 - lam) * weighted_avg_neighbor_lead[node_idx]
+        return lam * node_val + (1 - lam) * weighted_avg_neighbor_lead[node_idx]
         
     @staticmethod
     def graph_Kneighbors(graph, K):
