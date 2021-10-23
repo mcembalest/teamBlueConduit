@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd 
 
 from sklearn.neighbors import NearestNeighbors
+from sklearn.metrics import log_loss
 from scipy.sparse import csr_matrix
 
 import networkx as nx 
