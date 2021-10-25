@@ -5,7 +5,7 @@ import numpy as np
 import os
 import pandas as pd
 from sklearn.model_selection import train_test_split, GroupShuffleSplit
-from .metadata import cols_metadata_dict
+from metadata import cols_metadata_dict
 
 def blue_conduit_preprocessing(sl_df, cols_metadata):
     drop_cols = cols_metadata['drop_cols']
@@ -19,10 +19,10 @@ def blue_conduit_preprocessing(sl_df, cols_metadata):
     data = data[~pd.isnull(data.dangerous)].reset_index(drop=True)
     
     # Keep track of pid
-    pid = data[['pid', 'Latitude', 'Longitude']]
+    pid = data[['pid', 'Latitude', 'Longitude', 'geometry']]
     
     # Drop everything except target from training data
-    Xdata = data.drop(['pid', 'sl_private_type', 'sl_public_type', 'dangerous', 'Latitude', 'Longitude'], axis = 1)
+    Xdata = data.drop(['pid', 'sl_private_type', 'sl_public_type', 'dangerous', 'Latitude', 'Longitude', 'geometry'], axis = 1)
 
     # Build target.  Each 'dangerous' is True when sl_private_type OR sl_public_type contain lead.
     Ydata =  data[target_cols]#data[['sl_private_type', 'sl_public_type', 'dangerous']]
