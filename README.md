@@ -62,9 +62,10 @@ All files can be replicated locally, though the distance matrices are > 5GB and 
 
 
 ## Build datasets
-**```
-build_datasets(data_raw_path, save_dir=None, n_splits=3, train_size_list=None, cells_across_list=None, random_state=42, plot_splits=True)
+**```build_datasets(data_raw_path, save_dir=None, n_splits=3, train_size_list=None, cells_across_list=None, 
+                    random_state=42, plot_splits=True)```**
 
+```
 Returns
 ---------------------
   Xdata: pd.DataFrame
@@ -73,7 +74,7 @@ Returns
   train_idx: dict
   test_idx: dict
   partitions_builder: gizmo.spatial_partitions.partitions.PartitionsBuilder
-```**           
+```         
 
 **Example**
 
