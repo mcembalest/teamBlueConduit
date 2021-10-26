@@ -62,9 +62,14 @@ def blue_conduit_preprocessing(sl_df, cols_metadata):
     
     return Xdata, Ydata, partitions_builder, pid
 
-def get_partition(partitions_builder, num_cells_across, n_splits, random_state, plot_splits=False):
+def get_partition(partitions_builder, num_cells_across, n_splits, random_state, plot_splits=False, test_size=0.2):
     hexagons = partitions_builder.Partition(partition_type='hexagon', num_cells_across=num_cells_across)
-    hex_splitter = hexagons.cv_splitter(n_splits=n_splits, strategy='ShuffleSplit', plot=plot_splits, random_state=random_state)
+    hex_splitter = hexagons.cv_splitter(n_splits=n_splits, 
+                                        strategy='ShuffleSplit', 
+                                        plot=plot_splits, 
+                                        random_state=random_state,
+                                        test_size=test_size
+                                       )
     train_idx, test_idx = list(zip(*hex_splitter.split(output_level='parcel')))
     train_idx = np.array(train_idx, dtype=object)
     test_idx = np.array(test_idx, dtype=object)
@@ -99,6 +104,8 @@ def split_index(Xdata,
     print(cells_across_list)
     assert isinstance(train_size_list, (list, tuple, np.ndarray))
     assert isinstance(train_size_list[0], float)
+    assert max(train_size_list)<=1
+    assert min(train_size_list)>=0
     
     assert isinstance(cells_across_list, (list, tuple, np.ndarray))
     assert isinstance(cells_across_list[0], (np.int64, int))
@@ -108,7 +115,8 @@ def split_index(Xdata,
 
     for train_size in tqdm(train_size_list):
         for num_cells_across in tqdm(cells_across_list):
-            train_idx, test_idx = get_partition(partitions_builder, num_cells_across, n_splits, random_state, plot_splits)
+            test_size = 1-train_size
+            train_idx, test_idx = get_partition(partitions_builder, num_cells_across, n_splits, random_state, plot_splits, test_size)
             train_idx_data[f'ts_{train_size}'][f'res_{num_cells_across}'] = train_idx
             test_idx_data[f'ts_{train_size}'][f'res_{num_cells_across}'] = test_idx
         
