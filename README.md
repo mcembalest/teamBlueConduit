@@ -63,7 +63,7 @@ All files can be replicated locally, though the distance matrices are > 5GB and 
 
 ## Build datasets
 **```build_datasets(data_raw_path, save_dir=None, n_splits=3, train_size_list=None, cells_across_list=None, 
-                    random_state=42, plot_splits=True)```**
+                    random_state=42, plot_splits=False)```**
 
 ```
 Returns
@@ -74,7 +74,15 @@ Returns
   train_idx: dict
   test_idx: dict
   partitions_builder: gizmo.spatial_partitions.partitions.PartitionsBuilder
-```         
+```
+
+If no `train_size_list` is provided it will be replaced with:
+```array([0.1, 0.3, 0.4, 0.6, 0.7, 0.9])```
+
+Similarly, `cells_across_list` will be replaced with:
+```array([ 5, 10, 22, 47, 99])```
+
+Also, note that with these default parameters, the total time to build the datasets will be around ~386.67 s (measured on two CPU, 16Gb RAM).
 
 **Example**
 
@@ -91,7 +99,18 @@ Xdata, Ydata, pid, train_idx, test_idx, partitions_builder = build_datasets(data
 ```
 ## Load datasets
 
-```load_datasets(load_dir)```
+**```load_datasets(load_dir)```**
+
+```
+Returns
+---------------------
+  Xdata: pd.DataFrame
+  Ydata: pd.DataFrame
+  pid: gpd.GeoDataFrame
+  train_idx: dict
+  test_idx: dict
+  partitions_builder: gizmo.spatial_partitions.partitions.PartitionsBuilder
+```  
 
 **Example**
 
