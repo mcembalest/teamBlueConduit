@@ -1,8 +1,54 @@
 ##### Requirements with specific versioning
 numpy >= 1.19
-pandas >= 1.2
+pandas >= 1.3.3
 geopandas >= 0.9.0
 xgboost >= 1.4
 scikit-learn >= 0.24
 matplotlib >= 3.3.0
 setuptools
+statsmodels
+stringcase
+osmnx
+seaborn
+kdepy
+pyyaml
+awscli
+boto3
+black
+mypy
+colorama
+fiona
+fsspec
+geopandas
+ipython
+jupyterlab
+matplotlib
+openpyxl
+pandas
+pip
+plotly
+py-xgboost
+pyaml
+pytest
+psycopg2
+scikit-learn
+scipy
+seaborn
+shapely
+statsmodels
+structlog
+s3fs
+sqlalchemy
+geoalchemy2
+xlrd
+osmnx
+geoplot
+feather-format
+-e gizmo
+portray
+KDEpy
+stringcase
+tqdm
+csv2md
+densratio
+
