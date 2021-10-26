@@ -5,7 +5,26 @@ Team Members: Javiera Astudillo, Max Cembalest, Kevin Hare, and Dashiell Young-S
 
 # Libraries setup
 
-```pip install .```
+Start at root folder
+
+## Install local libraries
+
+```
+pip install .
+```
+
+## Install requirements
+
+```
+pip install -r requirements.txt
+```
+
+## Install partner libraries
+
+```
+cd gizmo
+pip install -e .
+```
 
 # Data
 
@@ -15,28 +34,6 @@ To reduce space locally, we have utilized a consistent structure of the data fol
 
 ```
 ...
-├── data
-│   ├── README.md
-│   ├── processed
-│   │   ├── Xdata.csv
-│   │   ├── Ydata.csv
-│   │   ├── cols_metadata.json
-│   │   ├── pid.csv
-│   │   ├── test_index.npz
-│   │   └── train_index.npz
-|   |   └── road_distances.npz
-|   |   └── haversine_distances.npz
-│   ├── raw
-│   │   └── flint_sl_materials
-│   │       ├── flint_sl_materials.cpg
-│   │       ├── flint_sl_materials.dbf
-│   │       ├── flint_sl_materials.prj
-│   │       ├── flint_sl_materials.shp
-│   │       └── flint_sl_materials.shx
-│   ├── predictions
-│   │   ├── pred_probs_train.npz
-│   │   ├── pred_probs_test.npz
-
 ├── data
 │   ├── README.md
 │   ├── predictions
@@ -65,20 +62,30 @@ All files can be replicated locally, though the distance matrices are > 5GB and 
 
 
 ## Build datasets
-```build_datasets(data_raw_path, save_dir=None, n_splits=3, train_size_list=None, random_state=42)```
+```build_datasets(data_raw_path, save_dir=None, n_splits=3, train_size_list=None, cells_across_list=None, 
+                   random_state=42, plot_splits=True)
+
+Returns:
+* Xdata: pd.DataFrame
+* Ydata: pd.DataFrame
+* pid: gpd.GeoDataFrame
+* train_idx: dict
+* test_idx: dict
+* partitions_builder: gizmo.spatial_partitions.partitions.PartitionsBuilder
+```              
 
 **Example**
 
 Note: the following code can be executed in a Jupyter Notebook, or alternatively by navigating to `blue_conduit_spatial/utilities` and running `python data_utils.py`, where the default behavior will mirror the directories below.
 
 ```
-from blue_conduit_spatial.utilities import build_datasets, load_datasets
+from blue_conduit_spatial.utilities import build_datasets
 
 data_dir = '../data'
 data_raw_path = f'{data_dir}/raw/flint_sl_materials/'
 save_dir = f'{data_dir}/processed'
 
-Xdata, Ydata, pid, train_idx, test_idx = build_datasets(data_raw_path, save_dir=save_dir)
+Xdata, Ydata, pid, train_idx, test_idx, partitions_builder = build_datasets(data_raw_path, save_dir=save_dir)
 ```
 ## Load datasets
 
@@ -87,21 +94,35 @@ Xdata, Ydata, pid, train_idx, test_idx = build_datasets(data_raw_path, save_dir=
 **Example**
 
 ```
-from blue_conduit_spatial.utilities import build_datasets, load_datasets
+from blue_conduit_spatial.utilities import load_datasets
 
 data_dir = '../data'
 load_dir = f'{data_dir}/processed'
 
-Xdata, Ydata, pid, train_idx, test_idx = load_datasets(load_dir)
+Xdata, Ydata, pid, train_idx, test_idx, partitions_builder = load_datasets(load_dir)
 
-train_idx.files
->>> ['0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9']
+train_idx.keys()
+>>> dict_keys(['ts_0.1', 'ts_0.3', 'ts_0.4', 'ts_0.6', 'ts_0.7', 'ts_0.9'])
 
-train_idx['0.1']
->>> array([array([  537,   539,   540, ..., 24621, 24622, 24623]),
-           array([   48,    51,    59, ..., 26859, 26860, 26861]),
-           array([ 2893,  2912,  2919, ..., 26852, 26857, 26862])],
-           dtype=object)
+train_idx['ts_0.1'].keys()
+>>> dict_keys(['res_5', 'res_10', 'res_22', 'res_47', 'res_99'])
+
+train_idx_['ts_0.1']['res_5']
+>>> array([Int64Index([1863, 1864, 1865, 1866, 1867, 1868, 1869, 1870, 1871, 1872,
+                   ...
+                   4221, 4222, 4223, 4224, 4225, 4226, 4227, 4228, 4229, 4230],
+                   dtype='int64', length=2368)                                  ,
+           Int64Index([6778, 6779, 6780, 6781, 6782, 6783, 6784, 6785, 6786, 6787,
+                   ...
+                   9154, 9155, 9156, 9157, 9158, 9159, 9160, 9161, 9162, 9163],
+                   dtype='int64', length=2386)                                  ,
+           Int64Index([20632, 20633, 20634, 20635, 20636, 20637, 20638, 20639, 20640,
+                   20641,
+                   ...
+                   23567, 23568, 23569, 23570, 23571, 23572, 23573, 23574, 23575,
+                   23576],
+                   dtype='int64', length=2945)                                    ],
+      dtype=object)
 ```
 
 # Modeling
