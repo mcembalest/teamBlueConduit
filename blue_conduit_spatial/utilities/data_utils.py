@@ -123,7 +123,7 @@ def split_index(Xdata,
     return train_idx_data, test_idx_data
 
 def build_datasets(data_raw_path, save_dir=None, n_splits=3, train_size_list=None, cells_across_list=None, 
-                   random_state=42, plot_splits=True):
+                   random_state=42, plot_splits=False):
     cols_metadata = cols_metadata_dict(save_dir)
     col_name_dictionary = cols_metadata['col_name_dictionary']
     
