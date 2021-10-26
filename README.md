@@ -26,6 +26,12 @@ cd gizmo
 pip install -e .
 ```
 
+Note that in order to install the partner libraries you need a version of Python >=3.7. If you are in a virtual env with conda, you can do it like this:
+
+```
+conda update python
+```
+
 # Data
 
 ## Data folder structure
