@@ -36,19 +36,19 @@ scipy
 seaborn
 shapely
 statsmodels
-structlog
-s3fs
-sqlalchemy
+#structlog
+#s3fs
+#sqlalchemy
 geoalchemy2
 xlrd
 osmnx
 geoplot
 feather-format
--e gizmo
+#-e gizmo
 portray
-KDEpy
+#KDEpy
 stringcase
 tqdm
 csv2md
-densratio
-
+#densratio
+pickle5
