@@ -6,10 +6,10 @@ import numpy as np
 import os
 import pandas as pd
 from tqdm import tqdm
-
 from gizmo import spatial_partitions
 from gizmo.spatial_partitions import partitions
 from .metadata import cols_metadata_dict
+from sklearn.model_selection import train_test_split, GroupShuffleSplit
 
 def get_partitions_builder(data):
     data['parcel_id'] = data.pid
