@@ -1,8 +1,8 @@
 from datetime import datetime
 import json
 import geopandas as gpd
-#import pickle
-import pickle5 as pickle
+import pickle
+import pickle5
 import numpy as np
 import os
 import pandas as pd
@@ -189,7 +189,10 @@ def load_datasets(load_dir):
     test_idx = format_npz_dict(np.load(test_idx_path, allow_pickle=True))
     
     with open(builder_path, 'rb') as f:  # Overwrites any existing file.
-        partitions_builder = pickle.load(f)
+        try:
+            partitions_builder = pickle.load(f)
+        except:
+            partitions_builder = pickle5.load(f)
     
     return Xdata, Ydata, pid, train_idx, test_idx, partitions_builder
 
