@@ -4,6 +4,8 @@ data/raw/
 *.csv
 data/*.json
 data/processed/
+*.gpkg
+*.pk
 
 Pipfile*
 
