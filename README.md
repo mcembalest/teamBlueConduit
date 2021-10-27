@@ -116,7 +116,7 @@ Returns
   train_idx: dict
   test_idx: dict
   partitions_builder: gizmo.spatial_partitions.partitions.PartitionsBuilder
-```  
+```
 
 **Example**
 
@@ -150,6 +150,27 @@ train_idx_['ts_0.1']['res_5']
                    23576],
                    dtype='int64', length=2945)                                    ],
       dtype=object)
+```
+
+**```load_predictions(pred_dir)```**
+
+```
+Returns
+---------------------
+  train_preds: dict
+  test_preds: dict
+
+```
+
+**Example**
+
+```
+from blue_conduit_spatial.utilities import load_predictions
+
+data_dir = '../data'
+pred_dir = f'{data_dir}/processed'
+
+train_preds, test_preds = load_datasets(pred_dir)
 ```
 
 # Modeling

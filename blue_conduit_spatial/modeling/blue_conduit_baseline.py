@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import geopandas as gpd
 from blue_conduit_spatial.utilities import load_datasets
-from sklearn.model_selection import GroupShuffleSplit
 import xgboost as xgb
 import sys
 
@@ -21,41 +20,55 @@ def create_data_from_idx(xdata, ydata, train_idx_list, test_idx_list):
 
     return xtrain, xtest, ytrain, ytest
 
-def run_baselines(load_dir='../../data/processed', save_dir='../../data/predictions'):
-    Xdata, Ydata, pid, train_idx, test_idx = load_datasets(load_dir)
+def run_baselines(load_dir='../../data/processed', save_dir='../../data/predictions', verbose=True):
+    Xdata, Ydata, pid, train_idx, test_idx, partitions_builder = load_datasets(load_dir)
 
     # Find list of all train percentages available
     train_pcts = list(train_idx.keys())
+
+    # Find resolutions
+    train_resolutions = list(train_idx[train_pcts[0]].keys())
+
     # Calculate number of splits per percentage
-    n_split = len(train_idx[train_pcts[0]])
+    n_split = len(train_idx[train_pcts[0]][train_resolutions[0]])
 
     pred_probs_train_dict = {}
     pred_probs_test_dict = {}
     for i, t in enumerate(train_pcts):
-        train_probs = []
-        test_probs = []
-        for s in range(n_split):
-            # Create data specific to the model being fit
-            selected_train_idx = train_idx[t][s]
-            selected_test_idx = test_idx[t][s]
-            xtrain, xtest, ytrain, ytest = create_data_from_idx(Xdata, Ydata, selected_train_idx, selected_test_idx)
+        if verbose:
+            print(f"Working on train percentage {t}")
+        train_probs_pct = {}
+        test_probs_pct = {}
+        for j, res in enumerate(train_resolutions):
+            train_probs_res = []
+            test_probs_res = []
+            for s in range(n_split):
+                # Create data specific to the model being fit
+                selected_train_idx = train_idx[t][res][s]
+                selected_test_idx = test_idx[t][res][s]
+                xtrain, xtest, ytrain, ytest = create_data_from_idx(Xdata, Ydata, selected_train_idx, selected_test_idx)
 
-            mod = fit_baseline_model(xtrain, ytrain)
+                mod = fit_baseline_model(xtrain, ytrain)
+                
+                train_preds = mod.predict_proba(xtrain)
+                train_probs_res.append(train_preds[:,1])
+                
+                test_preds = mod.predict_proba(xtest)
+                test_probs_res.append(test_preds[:,1])
+            if verbose:
+                print(f"Finished with resolution {res}")
             
-            train_preds = mod.predict_proba(xtrain)
-            train_probs.append(train_preds[:,1])
-            
-            test_preds = mod.predict_proba(xtest)
-            test_probs.append(test_preds[:,1])
+            train_probs_pct[res] = np.array(train_probs_res, dtype='object')
+            test_probs_pct[res] = np.array(test_probs_res, dtype='object')
 
-        pred_probs_train_dict[t] = np.array(train_probs, dtype='object')
-        pred_probs_test_dict[t] = np.array(test_probs, dtype='object')
+        pred_probs_train_dict[t] = train_probs_pct
+        pred_probs_test_dict[t] = test_probs_pct
 
     np.savez(f'{save_dir}/pred_probs_train.npz', **pred_probs_train_dict)
     np.savez(f'{save_dir}/pred_probs_test.npz', **pred_probs_test_dict)
 
 if __name__ == '__main__':
-    run_baselines()
+    run_baselines(verbose=True)
 
     
 

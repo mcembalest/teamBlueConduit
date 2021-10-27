@@ -2,6 +2,7 @@ from datetime import datetime
 import json
 import geopandas as gpd
 import pickle
+import pickle5
 import numpy as np
 import os
 import pandas as pd
@@ -168,6 +169,11 @@ def build_datasets(data_raw_path, save_dir=None, n_splits=3, train_size_list=Non
             
     return Xdata, Ydata, pid, train_idx, test_idx, partitions_builder
 
+def format_npz_dict(dict_):
+    dict_ = dict(dict_)
+    dict_ = dict([(k,v.item()) for k,v in dict_.items()])
+    return dict_
+
 def load_datasets(load_dir):
     Xdata_path = f'{load_dir}/Xdata.csv'
     Ydata_path = f'{load_dir}/Ydata.csv'
@@ -176,11 +182,6 @@ def load_datasets(load_dir):
     pid_path = f'{load_dir}/pid.gpkg'
     builder_path = f'{load_dir}/partitions_builder.pk'
     
-    def format_npz_dict(dict_):
-        dict_ = dict(dict_)
-        dict_ = dict([(k,v.item()) for k,v in dict_.items()])
-        return dict_
-    
     Xdata = pd.read_csv(Xdata_path)
     Ydata = pd.read_csv(Ydata_path)
     pid = gpd.read_file(pid_path) 
@@ -188,9 +189,20 @@ def load_datasets(load_dir):
     test_idx = format_npz_dict(np.load(test_idx_path, allow_pickle=True))
     
     with open(builder_path, 'rb') as f:  # Overwrites any existing file.
-        partitions_builder = pickle.load(f)
+        try:
+            partitions_builder = pickle.load(f)
+        except:
+            partitions_builder = pickle5.load(f)
     
     return Xdata, Ydata, pid, train_idx, test_idx, partitions_builder
+
+def load_predictions(pred_dir):
+    train_path = f"{pred_dir}/pred_probs_train.npz"
+    test_path = f"{pred_dir}/pred_probs_test.npz"
+
+    train_preds = format_npz_dict(np.load(train_path, allow_pickle=True))
+    test_preds = format_npz_dict(np.load(test_path, allow_pickle=True))
+    return train_preds, test_preds
 
 if __name__ == '__main__':
     data_dir = '../../data'
