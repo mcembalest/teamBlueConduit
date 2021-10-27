@@ -27,7 +27,7 @@ openpyxl
 pandas
 pip
 plotly
-py-xgboost
+#py-xgboost
 pyaml
 pytest
 psycopg2
