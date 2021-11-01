@@ -219,6 +219,8 @@ plot_hit_rate_curve(Ytest, [test_pred, np.random.beta(1, 1, size=len(test_pred))
                     mode='all')
 ```
 
+![hrc-baseline](plots/plot_hrc_baseline.png)
+
 
 ### Comparison between HRC methods
 In the plot below, we demonstrate the differences in performance for the Blue Conduit baseline, for a single split / resolution / set of hyperparameters. Note that most splits / resolutions show qualitatively similar results. Increasing initial threshold improves performance over initial homes. Decreasing increment has similar parameter. Decreasing minimum num. homes improves relative performance over second half of homes.
