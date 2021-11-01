@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.metrics import roc_auc_score as ras
 from sklearn.metrics import precision_score, classification_report
 from sklearn.calibration import calibration_curve
+import geopandas as gpd
 
 def pred2d_to_1d(arr):
     """Helper method for creating 1D array to enforce
@@ -149,15 +150,15 @@ def generate_hit_rate_curve_by_partition(parcel_df,
                 part_dug_idx_list.extend(to_dig.index.values)
                 pred_prob_list.extend(to_dig['pred_prob'].values)
 
-    # Remove all parcels which have been excavated from the
-    df = df.iloc[~df.index.isin(part_dug_idx_list)]
+        # Remove all parcels which have been excavated from the
+        df = df.iloc[~df.index.isin(part_dug_idx_list)]
 
-    # If possible, decrease threshold
-    if threshold - threshold_increment > 0:
-        threshold -= threshold_increment
-    else:
-        min_digs -= min_digs_increment
-        threshold = threshold_init
+        # If possible, decrease threshold
+        if threshold - threshold_increment > 0:
+            threshold -= threshold_increment
+        else:
+            min_digs -= min_digs_increment
+            threshold = threshold_init
 
     return np.cumsum(true_label_list)/(np.arange(len(true_label_list))+1), pred_prob_list
 
