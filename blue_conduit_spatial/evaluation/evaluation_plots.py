@@ -106,7 +106,10 @@ def plot_hit_rate_curve(y_true,
             plt.xlim(1, 0)
         else:
             xs = np.arange(len(hit_rates))
-            plt.xlabel('Position in sample, order by pred. prob.')
+            if mode == 'partition':
+                plt.xlabel('Position in sample, ordered by partition')
+            else:
+                plt.xlabel('Position in sample, order by pred. prob.')
             plt.title("Cumulative Hit Rate Curve by Prediction Probability")
         hit_rate_list.append(hit_rates)
         pred_prob_list.append(pred_probs)
