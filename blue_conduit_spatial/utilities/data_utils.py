@@ -233,10 +233,11 @@ def select_data(Xdata, Ydata, pid, train_idx, test_idx, train_pred_all, test_pre
         pid_test = pid.iloc[test_index].pid.values
         pid_lat_lon_train = pid.iloc[train_index]
         pid_lat_lon_test = pid.iloc[test_index]
-        return (Xtrain, Xtest, Ytrain, Ytest, train_pred, test_pred, hexagons,
+        return (train_index, test_index, 
+                Xtrain, Xtest, Ytrain, Ytest, train_pred, test_pred, hexagons,
                 pid_train, pid_test, pid_lat_lon_train, pid_lat_lon_test)
     else:
-        return (Xtrain, Xtest, Ytrain, Ytest, train_pred, test_pred, hexagons)
+        return (train_index, test_index, Xtrain, Xtest, Ytrain, Ytest, train_pred, test_pred, hexagons)
 
     
 
