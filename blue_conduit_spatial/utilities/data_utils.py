@@ -239,9 +239,6 @@ def select_data(Xdata, Ydata, pid, train_idx, test_idx, train_pred_all, test_pre
     else:
         return (train_index, test_index, Xtrain, Xtest, Ytrain, Ytest, train_pred, test_pred, hexagons)
 
-    
-
-
 if __name__ == '__main__':
     data_dir = '../../data'
     data_raw_path = f'{data_dir}/raw/flint_sl_materials/'
