@@ -156,7 +156,7 @@ def generate_hit_rate_curve_by_partition(parcel_df,
         # If possible, decrease threshold
         if threshold - threshold_increment > 0:
             threshold -= threshold_increment
-        else:
+        else:   
             min_digs -= min_digs_increment
             threshold = threshold_init
 
