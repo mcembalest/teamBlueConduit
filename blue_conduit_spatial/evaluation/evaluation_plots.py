@@ -3,7 +3,7 @@ from matplotlib import cm
 import numpy as np
 from sklearn.metrics import precision_recall_curve, auc
 
-from blue_conduit_spatial.evaluation import generate_calibration_curve, generate_hit_rate_curve
+from blue_conduit_spatial.evaluation import generate_calibration_curve, generate_hit_rate_curve, generate_hit_rate_curve_by_partition
 
 #### HELPER FUNCTIONS #####
 def sample_num_to_prob(hit_rates, pred_probs, n=500):
@@ -35,8 +35,21 @@ def sample_num_to_prob(hit_rates, pred_probs, n=500):
     return np.array(hit_rate_output), thresholds[1:]
 
 
-def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, max_perf=False, 
-                        order_by_prob=False, figsize=(10,6), savefig=False, figname=None, figdir=None):
+def plot_hit_rate_curve(y_true, 
+                        y_pred, 
+                        plot_probs=True, 
+                        labels=None, 
+                        max_perf=False, 
+                        order_by_prob=False, 
+                        figsize=(10,6), 
+                        savefig=False, 
+                        figname=None, 
+                        figdir=None, 
+                        mode='all',
+                        parcel_df=None,
+                        index_list=None,
+                        threshold_init=None 
+                        ):
     """Generates plot of hit rate curve with three potential modes:
         (1) Single model, no prediction probabilities;
         (2) Multiple models, no prediction probabilities;
@@ -61,6 +74,9 @@ def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, max_perf=F
     Returns:
         None
     """
+    if mode not in ['all', 'partition']:
+        raise ValueError(f"Mode must be one of 'all' or 'partition'.")
+
     fig = plt.figure(figsize=figsize)
 
     # Handle non-list instances of the predictions
@@ -70,7 +86,17 @@ def plot_hit_rate_curve(y_true, y_pred, plot_probs=True, labels=None, max_perf=F
     hit_rate_list = []
     pred_prob_list = []
     for mod in y_pred:
-        hit_rates, pred_probs = generate_hit_rate_curve(y_true, mod)
+        if mode == 'all':
+            hit_rates, pred_probs = generate_hit_rate_curve(y_true, mod)
+        elif mode == 'partition':
+            if sum([x is None for x in [parcel_df, index_list, threshold_init]]) > 0:
+                raise ValueError(
+                    "In partition mode, none of parcel_df, index_list, or threshold_init can  be none")
+            hit_rates, pred_probs = generate_hit_rate_curve_by_partition(parcel_df, 
+                                                                        index_list, 
+                                                                        y_true, 
+                                                                        mod, 
+                                                                        threshold_init)
 
         # If ordering by probability; set up thresholds
         if order_by_prob == True:
