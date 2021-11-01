@@ -183,6 +183,48 @@ To fit the Blue Conduit baseline XGBoost models, we can run the following comman
 
 Taken together, these commands will generate the `pred_probs_train.npz` and `pred_probs_test.npz` files. These correspond exactly to the indices described in `train_index.npz` and `test_index.npz`.
 
+# Evaluation
+
+## Generate hit rate curve
+There are two primary methods for generating the hit-rate curve, and a single plotting utility for doing so. The functions live in [blue_conduit_spatial.evaluation](blue_conduit_spatial/evaluation). First, `generate_hit_rate_curve` will create a hit rate curve ordering by the prediction probability. If generating the hit rate curve by partition (i.e. group by the partition and then investigate partitions with more expected lead first), this can be done by `generate_hit_rate_curve_by_partition`. These are equivalent when `threshold_init=1.0`, `threshold_increment=1e-6` (or some other arb. small number), and `min_digs=0`. That will visit partitions exactly in the order of the highest probability (though will be substantially slower).
+
+### Sample usage:
+```python3
+from blue_conduit_spatial.utilities import load_datasets, load_predictions
+form blue_conduit_spatial.evaluation import generate_hit_rate_curve, generate_hit_rate_curve_by_partition, plot_hit_rate_curve
+
+data_dir = '../data'
+load_dir = f'{data_dir}/Processed'
+pred_dir = f'{data_dir}/Predictions'
+pid_lat_lon_path = f'{load_dir}/pid.gpkg'
+train_pred_path = f'{pred_dir}/pred_probs_train.npz'
+test_pred_path = f'{pred_dir}/pred_probs_test.npz'
+
+Xdata, Ydata, pid, train_idx, test_idx, partitions_builder = load_datasets(load_dir)
+train_pred_all, test_pred_all = load_predictions(pred_dir)
+
+hex_size = 47
+train_size = 0.1
+split = 0
+
+(train_index, test_index, Xtrain, Xtest, Ytrain, 
+    Ytest, train_pred, test_pred, hexagons) = select_data(Xdata, Ydata, pid, train_idx, 
+                                                        test_idx, train_pred_all, 
+                                                        test_pred_all, train_size=train_size,
+                                                        n_hexagons=hex_size, split=split)
+
+
+plot_hit_rate_curve(Ytest, [test_pred, np.random.beta(1, 1, size=len(test_pred))], 
+                    plot_probs=False, labels=['Blue Conduit Baseline', 'Random Beta(1,1)'], 
+                    mode='all')
+```
+
+
+### Comparison between HRC methods
+In the plot below, we demonstrate the differences in performance for the Blue Conduit baseline, for a single split / resolution / set of hyperparameters. Note that most splits / resolutions show qualitatively similar results. Increasing initial threshold improves performance over initial homes. Decreasing increment has similar parameter. Decreasing minimum num. homes improves relative performance over second half of homes.
+
+![hrc-comparison](plots/hit_rate_curve_comparison.png)
+
 # Plots
 
 ## Plot precision-recall curve
