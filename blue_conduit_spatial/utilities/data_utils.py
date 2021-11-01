@@ -204,6 +204,36 @@ def load_predictions(pred_dir):
     test_preds = format_npz_dict(np.load(test_path, allow_pickle=True))
     return train_preds, test_preds
 
+def select_data(Xdata, Ydata, pid, train_idx, test_idx, train_pred_all, test_pred_all, 
+                train_size=0.1, n_hexagons=47, split=0, return_pid=False):
+    """Selects data for a single split"""
+
+    train_size = f'ts_{train_size}'
+    resolution = f'res_{n_hexagons}'
+
+    train_index = train_idx[train_size][resolution][split].values
+    test_index = test_idx[train_size][resolution][split].values
+
+    Xtrain = Xdata.iloc[train_index]
+    Xtest = Xdata.iloc[test_index]
+    Ytrain = Ydata.iloc[train_index]['dangerous'].values.astype('float')
+    Ytest = Ydata.iloc[test_index]['dangerous'].values.astype('float')
+    train_pred = train_pred_all[train_size][resolution][split]
+    test_pred = test_pred_all[train_size][resolution][split]
+
+    if return_pid:
+        pid_train = pid.iloc[train_index].pid.values
+        pid_test = pid.iloc[test_index].pid.values
+        pid_lat_lon_train = pid.iloc[train_index]
+        pid_lat_lon_test = pid.iloc[test_index]
+        return (Xtrain, Xtest, Ytrain, Ytest, train_pred, test_pred, 
+                pid_train, pid_test, pid_lat_lon_train, pid_lat_lon_test)
+    else:
+        return (Xtrain, Xtest, Ytrain, Ytest, train_pred, test_pred)
+
+    
+
+
 if __name__ == '__main__':
     data_dir = '../../data'
     data_raw_path = f'{data_dir}/raw/flint_sl_materials/'
