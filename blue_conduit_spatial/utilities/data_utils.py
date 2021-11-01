@@ -205,15 +205,18 @@ def load_predictions(pred_dir):
     return train_preds, test_preds
 
 def select_data(Xdata, Ydata, pid, train_idx, test_idx, train_pred_all, test_pred_all, 
+                partitions_builder, 
                 train_size=0.1, n_hexagons=47, split=0, return_pid=False):
     """Selects data for a single split"""
 
     train_size = f'ts_{train_size}'
     resolution = f'res_{n_hexagons}'
 
+    # Find necessary indices for sorting first
     train_index = train_idx[train_size][resolution][split].values
     test_index = test_idx[train_size][resolution][split].values
 
+    # Subset data as necessary
     Xtrain = Xdata.iloc[train_index]
     Xtest = Xdata.iloc[test_index]
     Ytrain = Ydata.iloc[train_index]['dangerous'].values.astype('float')
@@ -221,15 +224,19 @@ def select_data(Xdata, Ydata, pid, train_idx, test_idx, train_pred_all, test_pre
     train_pred = train_pred_all[train_size][resolution][split]
     test_pred = test_pred_all[train_size][resolution][split]
 
+    hexagons = partitions_builder.Partition(partition_type='hexagon', num_cells_across=n_hexagons)
+
+    # Since PID info is not likely to be needed, only
+    # optionally return this information
     if return_pid:
         pid_train = pid.iloc[train_index].pid.values
         pid_test = pid.iloc[test_index].pid.values
         pid_lat_lon_train = pid.iloc[train_index]
         pid_lat_lon_test = pid.iloc[test_index]
-        return (Xtrain, Xtest, Ytrain, Ytest, train_pred, test_pred, 
+        return (Xtrain, Xtest, Ytrain, Ytest, train_pred, test_pred, hexagons,
                 pid_train, pid_test, pid_lat_lon_train, pid_lat_lon_test)
     else:
-        return (Xtrain, Xtest, Ytrain, Ytest, train_pred, test_pred)
+        return (Xtrain, Xtest, Ytrain, Ytest, train_pred, test_pred, hexagons)
 
     
 
