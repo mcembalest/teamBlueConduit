@@ -154,7 +154,7 @@ def generate_hit_rate_curve_by_partition(parcel_df,
         df = df.iloc[~df.index.isin(part_dug_idx_list)]
 
         # If possible, decrease threshold
-        if threshold - threshold_increment > 0:
+        if threshold > 0:
             threshold -= threshold_increment
         else:   
             min_digs -= min_digs_increment
