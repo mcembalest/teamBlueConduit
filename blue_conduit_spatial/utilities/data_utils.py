@@ -196,7 +196,13 @@ def load_datasets(load_dir):
     
     return Xdata, Ydata, pid, train_idx, test_idx, partitions_builder
 
-def load_predictions(pred_dir):
+def load_predictions(pred_dir, probs_prefix='baseline'):
+    """Loads specific types of predictions with .npz endings
+    
+    Note that files should be saved as '{prefix}_pred_probs_train.npz
+    and '{prefix}pred_probs_test.npz'. For the baseline models this will be
+    simply 'pred_probs_train.npz', but for e.g. diffusion it will be
+    'diffusion_pred_probs_train.npz'. In this case"""
     train_path = f"{pred_dir}/pred_probs_train.npz"
     test_path = f"{pred_dir}/pred_probs_test.npz"
 
