@@ -86,8 +86,8 @@ def generate_hit_rate_curve_by_partition(parcel_df,
                                         y_pred, 
                                         threshold_init, 
                                         threshold_increment=0.1, 
-                                        min_digs=5, 
-                                        min_digs_increment=5
+                                        min_digs=1, 
+                                        min_digs_increment=1
                                         ):
     """Generates a hit rate curve where parcels are investigated partition. 
     
