@@ -48,7 +48,8 @@ def plot_hit_rate_curve(y_true,
                         mode='all',
                         parcel_df=None,
                         index_list=None,
-                        threshold_init=None 
+                        threshold_init=None, 
+                        **kwargs
                         ):
     """Generates plot of hit rate curve with three potential modes:
         (1) Single model, no prediction probabilities;
@@ -96,7 +97,8 @@ def plot_hit_rate_curve(y_true,
                                                                         index_list, 
                                                                         y_true, 
                                                                         mod, 
-                                                                        threshold_init)
+                                                                        threshold_init, 
+                                                                        **kwargs)
 
         # If ordering by probability; set up thresholds
         if order_by_prob == True:
