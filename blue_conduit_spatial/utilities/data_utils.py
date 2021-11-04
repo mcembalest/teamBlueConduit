@@ -203,8 +203,8 @@ def load_predictions(pred_dir, probs_prefix='baseline'):
     and '{prefix}pred_probs_test.npz'. For the baseline models this will be
     simply 'pred_probs_train.npz', but for e.g. diffusion it will be
     'diffusion_pred_probs_train.npz'. In this case"""
-    train_path = f"{pred_dir}/pred_probs_train.npz"
-    test_path = f"{pred_dir}/pred_probs_test.npz"
+    train_path = f"{pred_dir}/{probs_prefix}_pred_probs_train.npz"
+    test_path = f"{pred_dir}/{probs_prefix}_pred_probs_test.npz"
 
     train_preds = format_npz_dict(np.load(train_path, allow_pickle=True))
     test_preds = format_npz_dict(np.load(test_path, allow_pickle=True))
