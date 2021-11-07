@@ -190,8 +190,8 @@ There are two primary methods for generating the hit-rate curve, and a single pl
 
 ### Sample usage:
 ```python3
-from blue_conduit_spatial.utilities import load_datasets, load_predictions
-form blue_conduit_spatial.evaluation import generate_hit_rate_curve, generate_hit_rate_curve_by_partition, plot_hit_rate_curve
+from blue_conduit_spatial.utilities import load_datasets, load_predictions, select_data
+from blue_conduit_spatial.evaluation import generate_hit_rate_curve, generate_hit_rate_curve_by_partition, plot_hit_rate_curve
 
 data_dir = '../data'
 load_dir = f'{data_dir}/Processed'
@@ -209,9 +209,11 @@ split = 0
 
 (train_index, test_index, Xtrain, Xtest, Ytrain, 
     Ytest, train_pred, test_pred, hexagons) = select_data(Xdata, Ydata, pid, train_idx, 
-                                                        test_idx, train_pred_all, 
-                                                        test_pred_all, train_size=train_size,
-                                                        n_hexagons=hex_size, split=split)
+                                                          test_idx, train_pred_all, 
+                                                          test_pred_all, partitions_builder,
+                                                          train_size=train_size, 
+                                                          n_hexagons=hex_size, 
+                                                          split=split)
 
 
 plot_hit_rate_curve(Ytest, [test_pred, np.random.beta(1, 1, size=len(test_pred))], 
