@@ -199,7 +199,7 @@ pred_dir = f'{data_dir}/Predictions'
 pid_lat_lon_path = f'{load_dir}/pid.gpkg'
 
 Xdata, Ydata, pid, train_idx, test_idx, partitions_builder = load_datasets(load_dir)
-train_pred_all, test_pred_all = load_predictions(pred_dir, probs_prefix='diffusion')
+train_pred_all, test_pred_all = load_predictions(pred_dir, probs_prefix='baseline')
 
 hex_size = 47
 train_size = 0.1
@@ -215,7 +215,7 @@ split = 0
 
 
 plot_hit_rate_curve(Ytest, [test_pred, np.random.beta(1, 1, size=len(test_pred))], 
-                    plot_probs=False, labels=['Diffusion', 'Random Beta(1,1)'], 
+                    plot_probs=False, labels=['BlueConduit Baseline', 'Random Beta(1,1)'], 
                     mode='all')
 ```
 
