@@ -87,7 +87,8 @@ def generate_hit_rate_curve_by_partition(parcel_df,
                                         threshold_init, 
                                         threshold_increment=0.1, 
                                         min_digs=1, 
-                                        min_digs_increment=1
+                                        min_digs_increment=1,
+                                        gen_dig_metadata=False
                                         ):
     """Generates a hit rate curve where parcels are investigated partition. 
     
@@ -112,11 +113,18 @@ def generate_hit_rate_curve_by_partition(parcel_df,
     """
     # Create temporary dataframe containing only necessary features for filtering
     # process (initial parcel_df has many features; done to save space)
-    df = parcel_df.iloc[index_list]
+    df = parcel_df.iloc[index_list].copy()
     df['pred_prob'] = y_pred.copy()
     df['true_val'] = y_true.copy()
     df = df[['partition_ID', 'pred_prob', 'true_val']]
     threshold = threshold_init
+    
+    dig_metadata = None
+    if gen_dig_metadata:
+        dig_metadata = df.copy()
+        dig_metadata['dig_batch'] = None
+        dig_metadata['dig_threshold'] = None
+        dig_metadata['dig_partition_ID'] = None
 
     # Create running list of true values and prediction probs
     true_label_list = []
@@ -124,6 +132,7 @@ def generate_hit_rate_curve_by_partition(parcel_df,
 
     # Also track indices that have been dug
     part_dug_idx_list = []
+    batch = 0
 
     # Continue to move through DF while some parcels have not been added
     while len(df) > 0:
@@ -145,10 +154,20 @@ def generate_hit_rate_curve_by_partition(parcel_df,
                 # also choose some sort of random / noisy optimization as well
                 to_dig = df[(df['partition_ID']==part_idx) & (df['dig']==1)].sort_values(
                     'pred_prob', ascending=False)
-
-                true_label_list.extend(to_dig['true_val'].values)
-                part_dug_idx_list.extend(to_dig.index.values)
-                pred_prob_list.extend(to_dig['pred_prob'].values)
+                
+                dug_true_val = to_dig['true_val'].values
+                dug_pred = to_dig['pred_prob'].values
+                dug_index = to_dig.index.values
+                
+                part_dug_idx_list.extend(dug_index)
+                true_label_list.extend(dug_true_val)
+                pred_prob_list.extend(dug_pred)
+                
+                if gen_dig_metadata:
+                    dig_metadata.loc[dug_index, 'dig_batch'] = batch
+                    dig_metadata.loc[dug_index, 'dig_threshold'] = threshold
+                    dig_metadata.loc[dug_index, 'dig_partition_ID'] = part_idx
+            batch += 1
 
         # Remove all parcels which have been excavated from the
         df = df.iloc[~df.index.isin(part_dug_idx_list)]
@@ -159,8 +178,11 @@ def generate_hit_rate_curve_by_partition(parcel_df,
         else:   
             min_digs -= min_digs_increment
             threshold = threshold_init
+            
+    hit_rates = np.cumsum(true_label_list)/(np.arange(len(true_label_list))+1)
+    pred_probs = pred_prob_list
 
-    return np.cumsum(true_label_list)/(np.arange(len(true_label_list))+1), pred_prob_list
+    return hit_rates, pred_probs, dig_metadata
 
 def generate_calibration_curve(y_true, y_pred, n_bins=10, **kwargs):
     """Mask (with error handling) for sk-learn calibration curve
