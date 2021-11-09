@@ -249,7 +249,8 @@ def dig_stats_base(dig_data, criteria, include_cost=False):
     return stats
 
 # def dig_stats(strat_dig_data, strat_names=None, bins=15, mode='digs_lead_number'):
-def dig_stats(parcel_gdf, index_list, y_true, y_pred, strat_names=None, bins=15, mode='digs_lead_number'):
+def dig_stats(parcel_gdf, index_list, y_true, y_pred, strat_names=None, bins=15, mode='digs_lead_number',
+        hr_args=None):
     '''
     Calculate digging statistics for each strategy in `y_pred` based on `mode` criteria.
     Bins the data for improving the insights, following the digging order imposed by the hit rate curve.
@@ -270,13 +271,17 @@ def dig_stats(parcel_gdf, index_list, y_true, y_pred, strat_names=None, bins=15,
         y_pred = [y_pred]
     
     # Set hit rate curve arguments
-    hr_args = {
+    hr_args_base = {
         'parcel_df':parcel_gdf,
         'threshold_init':0.9,
         'gen_dig_metadata': True,
         'index_list': index_list,
         'y_true': y_true
     }
+    
+    if not hr_args is None:
+        hr_args_base.update(hr_args)
+    hr_args = hr_args_base
     
     # Collect digging data for each strategy in `pred_i`
     strat_dig_data = []
