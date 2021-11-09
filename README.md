@@ -260,24 +260,64 @@ plot_hit_rate_curve(**plot_args)
 ### Comparison between HRC methods
 In the plot below, we demonstrate the differences in performance for the Blue Conduit baseline, for a single split / resolution / set of hyperparameters. Note that most splits / resolutions show qualitatively similar results. Increasing initial threshold improves performance over initial homes. Decreasing increment has similar parameter. Decreasing minimum num. homes improves relative performance over second half of homes.
 
-```
-plot_args = {
-    'plot_probs': False,
-    'labels':['BlueConduit Baseline', 'Random Beta(1,1)'],
-    'mode':'all',
-    'y_true': y_test,
-    'y_pred': [data_bl['test_pred'], data_diff['test_pred']],
-    'title_suffix': 'Test set',
-    'mode':'partition',
-    'parcel_df':parcel_gdf,
-    'index_list': test_index,   
-    'threshold_init':0.9
-}
-
-plot_hit_rate_curve(**plot_args)
-```
-
 ![hrc-comparison](plots/hit_rate_curve_comparison.png)
+
+## Generate digging statistics table
+
+**```dig_stats(parcel_gdf, index_list, y_true, y_pred, strat_names=None, bins=15, mode='digs_lead_number', hr_args=None)```**
+
+```
+Returns
+---------------------
+  dig_stats_df: pd.DataFrame
+```
+
+Calculate digging statistics for each digging strategy within `y_pred` based on `mode` criteria.
+Bins the data for improving the insights, following the digging order imposed by the hit rate curve
+ordered by partition.
+
+Modes:
+* `digs_number`: parcels are binned in batches with equal number of diggings.
+* `digs_lead_number`: parcels are binned in batches with equal number of lead diggings.
+
+**```dig_savings(dig_stats_df, model1_str, model2_str)```**
+
+Meant to be used when `dig_stats` is in `mode=digs_lead_number`. Comparison of lead pipe replacement cost between
+`model1_str` and `model2_str` which should correspond to names in the `strat_names` passed to `dig_stats`.
+Generates a new column in the `dig_stats_df` with the cost savings segmented every `N` replaced pipes.
+
+```
+Returns
+---------------------
+  dig_stats_df: pd.DataFrame
+```
+
+### Sample usage
+
+```
+# Set `dig_stats` arguments
+parcel_gdf = parcel_gdf
+index_list = data_bl['test_index']
+y_true = data_bl['Ytest']
+y_pred = [data_bl['test_pred'], data_diff['test_pred']]
+strat_names = ['Baseline', 'Diffusion']
+bins = 15
+
+# Get digging statistics
+mode = 'digs_number'
+dig_stats_df = dig_stats(parcel_gdf, index_list, y_true, y_pred, strat_names=strat_names, bins=bins, mode=mode)
+dig_stats_df
+```
+
+
+```
+mode = 'digs_lead_number'
+dig_stats_df = dig_stats(parcel_gdf, index_list, y_true, y_pred, strat_names=strat_names, bins=bins, mode=mode)
+dig_stats_df = dig_savings(dig_stats_df, 'Baseline', 'Diffusion')
+dig_stats_df.head()
+```
+
+|   digs_lead_cum |   ('Baseline', 'prob_thres') |   ('Baseline', 'hit_rate') |   ('Baseline', 'digs') |   ('Baseline', 'digs_cum') | ('Baseline', 'cost')   | ('Baseline', 'cost_cum')   |   ('Diffusion', 'prob_thres') |   ('Diffusion', 'hit_rate') |   ('Diffusion', 'digs') |   ('Diffusion', 'digs_cum') | ('Diffusion', 'cost')   | ('Diffusion', 'cost_cum')   | ('Savings Diffusion over Baseline', '')   |\n|----------------:|-----------------------------:|---------------------------:|-----------------------:|---------------------------:|:-----------------------|:---------------------------|------------------------------:|----------------------------:|------------------------:|----------------------------:|:------------------------|:----------------------------|:------------------------------------------|\n|             483 |                          0.9 |                   0.945205 |                    511 |                        511 | $2,499,000             | $2,499,000                 |                           0.9 |                    0.948919 |                     509 |                         509 | $2,493,000              | $2,493,000                  | $6,000                                    |\n|             966 |                          0.9 |                   0.904494 |                    534 |                       1045 | $2,568,000             | $5,067,000                 |                           0.9 |                    0.909605 |                     531 |                        1040 | $2,559,000              | $5,052,000                  | $15,000                                   |\n|            1449 |                          0.9 |                   0.916509 |                    527 |                       1572 | $2,547,000             | $7,614,000                 |                           0.9 |                    0.939689 |                     514 |                        1554 | $2,508,000              | $7,560,000                  | $54,000                                   |\n|            1932 |                          0.9 |                   0.913043 |                    529 |                       2101 | $2,553,000             | $10,167,000                |                           0.9 |                    0.92     |                     525 |                        2079 | $2,541,000              | $10,101,000                 | $66,000                                   |\n|            2415 |                          0.9 |                   0.928846 |                    520 |                       2621 | $2,526,000             | $12,693,000                |                           0.9 |                    0.948919 |                     509 |                        2588 | $2,493,000              | $12,594,000                 | $99,000                                   |
 
 # Plots
 
