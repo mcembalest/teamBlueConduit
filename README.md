@@ -308,7 +308,7 @@ mode = 'digs_number'
 dig_stats_df = dig_stats(parcel_gdf, index_list, y_true, y_pred, strat_names=strat_names, bins=bins, mode=mode)
 dig_stats_df
 ```
-
+![hrc-comparison](plots/table_digs.png)
 
 ```
 mode = 'digs_lead_number'
@@ -316,8 +316,7 @@ dig_stats_df = dig_stats(parcel_gdf, index_list, y_true, y_pred, strat_names=str
 dig_stats_df = dig_savings(dig_stats_df, 'Baseline', 'Diffusion')
 dig_stats_df.head()
 ```
-
-|   digs_lead_cum |   ('Baseline', 'prob_thres') |   ('Baseline', 'hit_rate') |   ('Baseline', 'digs') |   ('Baseline', 'digs_cum') | ('Baseline', 'cost')   | ('Baseline', 'cost_cum')   |   ('Diffusion', 'prob_thres') |   ('Diffusion', 'hit_rate') |   ('Diffusion', 'digs') |   ('Diffusion', 'digs_cum') | ('Diffusion', 'cost')   | ('Diffusion', 'cost_cum')   | ('Savings Diffusion over Baseline', '')   |\n|----------------:|-----------------------------:|---------------------------:|-----------------------:|---------------------------:|:-----------------------|:---------------------------|------------------------------:|----------------------------:|------------------------:|----------------------------:|:------------------------|:----------------------------|:------------------------------------------|\n|             483 |                          0.9 |                   0.945205 |                    511 |                        511 | $2,499,000             | $2,499,000                 |                           0.9 |                    0.948919 |                     509 |                         509 | $2,493,000              | $2,493,000                  | $6,000                                    |\n|             966 |                          0.9 |                   0.904494 |                    534 |                       1045 | $2,568,000             | $5,067,000                 |                           0.9 |                    0.909605 |                     531 |                        1040 | $2,559,000              | $5,052,000                  | $15,000                                   |\n|            1449 |                          0.9 |                   0.916509 |                    527 |                       1572 | $2,547,000             | $7,614,000                 |                           0.9 |                    0.939689 |                     514 |                        1554 | $2,508,000              | $7,560,000                  | $54,000                                   |\n|            1932 |                          0.9 |                   0.913043 |                    529 |                       2101 | $2,553,000             | $10,167,000                |                           0.9 |                    0.92     |                     525 |                        2079 | $2,541,000              | $10,101,000                 | $66,000                                   |\n|            2415 |                          0.9 |                   0.928846 |                    520 |                       2621 | $2,526,000             | $12,693,000                |                           0.9 |                    0.948919 |                     509 |                        2588 | $2,493,000              | $12,594,000                 | $99,000                                   |
+![hrc-comparison](plots/table_digs_lead.png)
 
 # Plots
 
