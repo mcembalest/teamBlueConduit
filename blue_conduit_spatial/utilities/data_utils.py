@@ -211,7 +211,7 @@ def load_predictions(pred_dir, probs_prefix='baseline'):
     return train_preds, test_preds
 
 def select_data(Xdata, Ydata, pid, train_idx, test_idx, train_pred_all, test_pred_all, 
-                partitions_builder, train_size=0.1, n_hexagons=47, split=0, 
+                partitions_builder=None, train_size=0.1, n_hexagons=47, split=0, 
                 return_pid=False, generate_hexagons=True):
     """Selects data for a single split"""
 
@@ -232,29 +232,31 @@ def select_data(Xdata, Ydata, pid, train_idx, test_idx, train_pred_all, test_pre
 
     # Since PID info is not likely to be needed, only
     # optionally return this information
+    result = {}
+    result['train_index'] = train_index
+    result['test_index'] = test_index
+    result['Xtrain'] = Xtrain
+    result['Xtest'] = Xtest
+    result['Ytrain'] = Ytrain
+    result['Ytest'] = Ytest
+    result['train_pred'] = train_pred
+    result['test_pred'] = test_pred
+    
     if return_pid:
         pid_train = pid.iloc[train_index].pid.values
         pid_test = pid.iloc[test_index].pid.values
         pid_lat_lon_train = pid.iloc[train_index]
         pid_lat_lon_test = pid.iloc[test_index]
+        result['pid_train'] = pid_train
+        result['pid_test'] = pid_test
+        result['pid_lat_lon_train'] = pid_lat_lon_train
+        result['pid_lat_lon_test'] = pid_lat_lon_test
 
-        if generate_hexagons:
-            hexagons = partitions_builder.Partition(partition_type='hexagon', num_cells_across=n_hexagons)
+    if generate_hexagons:
+        hexagons = partitions_builder.Partition(partition_type='hexagon', num_cells_across=n_hexagons)
+        result['hexagons'] = hexagons
         
-            return (train_index, test_index, 
-                Xtrain, Xtest, Ytrain, Ytest, train_pred, test_pred, hexagons,
-                pid_train, pid_test, pid_lat_lon_train, pid_lat_lon_test)
-        else:
-            return (train_index, test_index, 
-                Xtrain, Xtest, Ytrain, Ytest, train_pred, test_pred, 
-                pid_train, pid_test, pid_lat_lon_train, pid_lat_lon_test)
-
-    else:
-        if generate_hexagons:
-            hexagons = partitions_builder.Partition(partition_type='hexagon', num_cells_across=n_hexagons)
-            return (train_index, test_index, Xtrain, Xtest, Ytrain, Ytest, train_pred, test_pred, hexagons)
-        else:
-            return (train_index, test_index, Xtrain, Xtest, Ytrain, Ytest, train_pred, test_pred)
+    return result
 
 if __name__ == '__main__':
     data_dir = '../../data'
