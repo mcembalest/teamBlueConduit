@@ -199,6 +199,15 @@ class ServiceLineDiffusion:
         """Returns an arbitrary float distance as the inverse for weighting.
         Also adjusts 0 to be 1 such that a distance of zero maps to a weight of 1"""
         return 1/(1 + distances)
+    
+    @staticmethod
+    def sqrt_distances(distances):
+        """Calculates distance weights as the square root of the distances
+
+        will tend to place more equal weight on further away neighbors since 
+        e.g. 1/(2 + 1) = 0.33 and 1/(3 + 1) = 0.25 are more spaced than 
+        1/(sqrt(2) + 1) = 0.41 and 1/(sqrt(3) + 1) = 0.36"""
+        return 1/(1 + np.sqrt(distances))
 
     def _get_lat_long(self, idx):
         """Returns latitude and longitude for a given index"""
