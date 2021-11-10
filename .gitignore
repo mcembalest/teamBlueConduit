@@ -1,6 +1,7 @@
 # Data Files
 data/raw/
 *.npz
+*.npy
 *.csv
 data/*.json
 data/processed/
