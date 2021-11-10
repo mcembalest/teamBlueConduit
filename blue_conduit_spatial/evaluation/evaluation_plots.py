@@ -49,6 +49,7 @@ def plot_hit_rate_curve(y_true,
                         parcel_df=None,
                         index_list=None,
                         threshold_init=None, 
+                        title_suffix=None,
                         **kwargs
                         ):
     """Generates plot of hit rate curve with three potential modes:
@@ -93,18 +94,21 @@ def plot_hit_rate_curve(y_true,
             if sum([x is None for x in [parcel_df, index_list, threshold_init]]) > 0:
                 raise ValueError(
                     "In partition mode, none of parcel_df, index_list, or threshold_init can  be none")
-            hit_rates, pred_probs = generate_hit_rate_curve_by_partition(parcel_df, 
-                                                                        index_list, 
-                                                                        y_true, 
-                                                                        mod, 
-                                                                        threshold_init, 
-                                                                        **kwargs)
+            hit_rates, pred_probs, _ = generate_hit_rate_curve_by_partition(parcel_df, 
+                index_list, 
+                y_true, 
+                mod, 
+                threshold_init, 
+                **kwargs)
 
         # If ordering by probability; set up thresholds
         if order_by_prob == True:
+            title = "Cumulative Hit Rate Curve by Classification Threshold"
+            if not title_suffix is None:
+                 title = title + f'\n{title_suffix}'
             hit_rates, xs = sample_num_to_prob(hit_rates, pred_probs, n=500)
             plt.xlabel(f"Classification threshold")
-            plt.title("Cumulative Hit Rate Curve by Classification Threshold")
+            plt.title(title)
             plt.xlim(1, 0)
         else:
             xs = np.arange(len(hit_rates))
@@ -112,7 +116,10 @@ def plot_hit_rate_curve(y_true,
                 plt.xlabel('Position in sample, ordered by partition')
             else:
                 plt.xlabel('Position in sample, order by pred. prob.')
-            plt.title("Cumulative Hit Rate Curve by Prediction Probability")
+            title = "Cumulative Hit Rate Curve by Prediction Probability"
+            if not title_suffix is None:
+                 title = title + f'\n{title_suffix}'
+            plt.title(title)
         hit_rate_list.append(hit_rates)
         pred_prob_list.append(pred_probs)
 
