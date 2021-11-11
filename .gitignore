@@ -8,6 +8,9 @@ data/processed/
 *.gpkg
 *.pk
 
+gizmo/
+service_line_pipeline/
+
 Pipfile*
 
 # Byte-compiled / optimized / DLL files

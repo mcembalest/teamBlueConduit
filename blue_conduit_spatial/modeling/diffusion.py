@@ -33,7 +33,7 @@ class ServiceLineDiffusion:
             to the test set
         lat_long_df (pd.DataFrame): if plotting, this will be used to localize
             points on the graph"""
-    def __init__(self, graph, train_indices, test_indices, Ytrain, Ytest, Ytest_pred, lam=0.5, lat_long_df=None):
+    def __init__(self, graph, train_indices, test_indices, Ytrain, Ytest, Ytrain_pred, Ytest_pred, lam=0.5, lat_long_df=None):
         self.graph = graph
         self.iter_ct = 1
         self.lam = lam
@@ -47,7 +47,7 @@ class ServiceLineDiffusion:
         self.Ytest = Ytest
         self.Ytest_pred = Ytest_pred
         self.curr_test_pred = self.Ytest_pred.copy() # Initialize 'current' prediction as baseline test
-        self.curr_train_pred = self.Ytrain.copy() # Initialize 'current' prediction as baseline test
+        self.curr_train_pred = Ytrain_pred.copy() # Initialize 'current' prediction as baseline test
 
         # Set aside separate all_predictions for plotting capabilities
         self.all_predictions = []
@@ -72,7 +72,7 @@ class ServiceLineDiffusion:
         self.neighbor_weights = self.distance_function(self.neighbor_distances)
 
         # Initialize the lead values & find weighted average of neighbor lead values
-        lead_vals = np.array([self._get_lead_value(idx) for idx in range(self.graph.shape[0])]).flatten()
+        lead_vals = np.array([self._get_lead_value(idx) for idx in range(self.graph.shape[0])]).flatten().astype(float)
         if verbose:
           print(f"Initial Log Loss: {log_loss(self.Ytest, lead_vals[self.test_indices]):0.2f}")
 
@@ -199,6 +199,15 @@ class ServiceLineDiffusion:
         """Returns an arbitrary float distance as the inverse for weighting.
         Also adjusts 0 to be 1 such that a distance of zero maps to a weight of 1"""
         return 1/(1 + distances)
+    
+    @staticmethod
+    def sqrt_distances(distances):
+        """Calculates distance weights as the square root of the distances
+
+        will tend to place more equal weight on further away neighbors since 
+        e.g. 1/(2 + 1) = 0.33 and 1/(3 + 1) = 0.25 are more spaced than 
+        1/(sqrt(2) + 1) = 0.41 and 1/(sqrt(3) + 1) = 0.36"""
+        return 1/(1 + np.sqrt(distances))
 
     def _get_lat_long(self, idx):
         """Returns latitude and longitude for a given index"""
@@ -216,9 +225,11 @@ class ServiceLineDiffusion:
         """If the parcel is in the training data, then lead value will be set to
         ground truth. Else, will return the prediction probability"""
         if idx in self.train_indices:
-            return self.Ytrain[self._idx2trainidx(idx)]
-        else:
+            return self.curr_train_pred[self._idx2trainidx(idx)]
+        elif idx in self.test_indices:
             return self.curr_test_pred[self._idx2testidx(idx)]
+        else:
+            return np.percentile(self.curr_test_pred, 50)
 
 
-    
+            
