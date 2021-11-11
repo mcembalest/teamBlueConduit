@@ -135,12 +135,21 @@ def generate_hit_rate_curve_by_partition(parcel_df,
     part_dug_idx_list = []
     batch = 0
 
+    # Initialize random number generator
+    rng = np.random.default_rng(seed=42)
+
     # Continue to move through DF while some parcels have not been added
     while len(df) > 0:
         # Find total parcels in each partition which have > threshold pred prob
         df['dig'] = (df['pred_prob'] > threshold).astype(int)
         part_sort = df.groupby(
-            'partition_ID').sum()['dig'].sort_values(ascending=False)
+            'partition_ID').sum()
+            
+        # Add in random number generator for searching partitions randomly
+        part_sort['rand'] = rng.uniform(size=part_sort.shape[0])
+        part_sort = part_sort.sort_values(
+            ['dig', 'rand'], ascending=False
+        )['dig']
         
         for i, x in enumerate(part_sort):
             # If fewer than `min_digs` expected hits in a given partition, 
