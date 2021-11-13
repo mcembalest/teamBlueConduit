@@ -102,6 +102,14 @@ def get_trained_graphSAGE_for_experiment(train_size, hex_size, s, Xdata,Ydata, p
     train_size:
     hex_size:
     s:
+    Xdata:
+    Ydata:
+    pid:
+    train_idx:
+    test_idx:
+    train_pred_all:
+    test_pred_all:
+    partitions_builder:
     verbose:
 
   Returns:
@@ -109,9 +117,7 @@ def get_trained_graphSAGE_for_experiment(train_size, hex_size, s, Xdata,Ydata, p
     flint_graphSAGE_train_gen:
     flint_graphSAGE_test_gen:
   '''
-  print(train_size, hex_size, s)
 
-  # y_pred_train_graphSAGE, y_pred_test_graphSAGE = get_graphSAGE_preds(train_size, hex_size, s)
   data = select_data(Xdata,Ydata, pid, train_idx, test_idx, train_pred_all, test_pred_all, partitions_builder, train_size=train_size, n_hexagons=hex_size, split=s)
   train_index = data['train_index']
   test_index = data['test_index']
@@ -128,11 +134,14 @@ def get_trained_graphSAGE_for_experiment(train_size, hex_size, s, Xdata,Ydata, p
   n_subgraph = len(subgraph_idx)
   subgraph = graph[:,subgraph_idx][subgraph_idx,:]
 
-  return get_trained_graphsage(subgraph_idx, train_index, test_index, train_pred, test_pred, verbose=verbose)
+  return get_trained_graphsage(Xdata, Ydata, subgraph, subgraph_idx, train_index, test_index, train_pred, test_pred, verbose=verbose)
   
-def get_trained_graphsage(Xdata, Ydata, subgraph_idx, train_index, test_index, train_pred, test_pred,verbose=False):
+def get_trained_graphsage(Xdata, Ydata, subgraph, subgraph_idx, train_index, test_index, train_pred, test_pred,verbose=False):
   '''
   Args:
+  	Xdata:
+  	Ydata:
+  	subgraph:
     subgraph_idx:
     train_index:
     test_index:
@@ -246,7 +255,7 @@ def get_trained_graphsage(Xdata, Ydata, subgraph_idx, train_index, test_index, t
     
   return flint_graphSAGE, flint_graphSAGE_train_gen, flint_graphSAGE_test_gen
 
-def train_models_on_data_splits(GraphSAGE_train_preds, GraphSAGE_test_preds, train_sizes, splits, resolutions):
+def train_models_on_data_splits(GraphSAGE_train_preds, GraphSAGE_test_preds, train_sizes, resolutions, splits, Xdata,Ydata, pid, train_idx, test_idx, train_pred_all, test_pred_all, partitions_builder):
   '''
   Args:
     GraphSAGE_train_preds:  
@@ -266,7 +275,7 @@ def train_models_on_data_splits(GraphSAGE_train_preds, GraphSAGE_test_preds, tra
       train_preds= []
       test_preds =[]
       for s in splits:
-        flint_graphSAGE = get_trained_graphSAGE_for_experiment(train_size, hex_size, s)
+        flint_graphSAGE = get_trained_graphSAGE_for_experiment(train_size, hex_size, s, Xdata,Ydata, pid, train_idx, test_idx, train_pred_all, test_pred_all, partitions_builder)
 
         y_pred_train_graphSAGE = flint_graphSAGE.predict(flint_graphSAGE_train_gen).flatten()
         y_pred_test_graphSAGE = flint_graphSAGE.predict(flint_graphSAGE_test_gen).flatten()
@@ -278,3 +287,4 @@ def train_models_on_data_splits(GraphSAGE_train_preds, GraphSAGE_test_preds, tra
       GraphSAGE_test_preds[f'ts_{train_size}'][f'res_{hex_size}'] = np.array(test_preds)
 
   return GraphSAGE_train_preds, GraphSAGE_test_preds
+
