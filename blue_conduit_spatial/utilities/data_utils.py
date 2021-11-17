@@ -43,14 +43,19 @@ def blue_conduit_preprocessing(sl_df, cols_metadata):
     # Build partitions
     partitions_builder = get_partitions_builder(data)
     
-    # Keep track of pid
-    pid = data[['pid', 'Latitude', 'Longitude', 'geometry']]
+    # Keep track of location
+    location = data[['pid', 'Latitude', 'Longitude', 'geometry']]
+    location = location.set_index('pid')
     
     # Drop everything except target from training data
-    Xdata = data.drop(['pid', 'sl_private_type', 'sl_public_type', 'dangerous', 'Latitude', 'Longitude', 'geometry'], axis = 1)
+    # Xdata = data.drop(['pid', 'sl_private_type', 'sl_public_type', 'dangerous', 'Latitude', 'Longitude', 'geometry'], axis = 1)
+    Xdata = data.drop(['sl_private_type', 'sl_public_type', 'dangerous', 'Latitude', 'Longitude', 'geometry'], axis = 1)
+    Xdata = Xdata.set_index('pid')
 
     # Build target.  Each 'dangerous' is True when sl_private_type OR sl_public_type contain lead.
-    Ydata =  data[target_cols]#data[['sl_private_type', 'sl_public_type', 'dangerous']]
+    Ydata = data[target_cols]#data[['sl_private_type', 'sl_public_type', 'dangerous']]
+    Ydata['pid'] = data['pid']
+    Ydata = Ydata.set_index('pid')
 
     # Fill missing data
     Xdata = Xdata.fillna(-1)
@@ -61,7 +66,7 @@ def blue_conduit_preprocessing(sl_df, cols_metadata):
     # Formerly groups for spatial cross validation, now done through `partitions_builder`
     Xdata = Xdata.drop('PRECINCT', axis=1)
     
-    return Xdata, Ydata, partitions_builder, pid
+    return Xdata, Ydata, partitions_builder, location
 
 def get_partition(partitions_builder, num_cells_across, n_splits, random_state, plot_splits=False, test_size=0.2):
     hexagons = partitions_builder.Partition(partition_type='hexagon', num_cells_across=num_cells_across)
@@ -72,15 +77,16 @@ def get_partition(partitions_builder, num_cells_across, n_splits, random_state, 
                                         test_size=test_size
                                        )
     train_idx, test_idx = list(zip(*hex_splitter.split(output_level='parcel')))
-    train_idx = np.array(train_idx, dtype=object)
-    test_idx = np.array(test_idx, dtype=object)
+    train_pid = [hexagons.parcel_gdf.iloc[train_idx_i].pid.values for train_idx_i in train_idx]
+    test_pid = [hexagons.parcel_gdf.iloc[test_idx_i].pid.values for test_idx_i in test_idx]
+    train_pid = np.array(train_pid, dtype=object)
+    test_pid = np.array(test_pid, dtype=object)
     
-    return train_idx, test_idx
+    return train_pid, test_pid
     
 def split_index(Xdata, 
                 Ydata, 
                 partitions_builder, 
-                pid, 
                 n_splits=5, 
                 train_size_list=None, 
                 cells_across_list=None, 
@@ -111,17 +117,17 @@ def split_index(Xdata,
     assert isinstance(cells_across_list, (list, tuple, np.ndarray))
     assert isinstance(cells_across_list[0], (np.int64, int))
     
-    train_idx_data = dict([(f'ts_{train_size_}',{}) for train_size_ in train_size_list])
-    test_idx_data = dict([(f'ts_{train_size_}',{}) for train_size_ in train_size_list])
+    train_pid_data = dict([(f'ts_{train_size_}',{}) for train_size_ in train_size_list])
+    test_pid_data = dict([(f'ts_{train_size_}',{}) for train_size_ in train_size_list])
 
     for train_size in tqdm(train_size_list):
         for num_cells_across in tqdm(cells_across_list):
             test_size = 1-train_size
-            train_idx, test_idx = get_partition(partitions_builder, num_cells_across, n_splits, random_state, plot_splits, test_size)
-            train_idx_data[f'ts_{train_size}'][f'res_{num_cells_across}'] = train_idx
-            test_idx_data[f'ts_{train_size}'][f'res_{num_cells_across}'] = test_idx
+            train_pid, test_pid = get_partition(partitions_builder, num_cells_across, n_splits, random_state, plot_splits, test_size)
+            train_pid_data[f'ts_{train_size}'][f'res_{num_cells_across}'] = train_pid
+            test_pid_data[f'ts_{train_size}'][f'res_{num_cells_across}'] = test_pid
         
-    return train_idx_data, test_idx_data
+    return train_pid_data, test_pid_data
 
 def build_datasets(data_raw_path, save_dir=None, n_splits=3, train_size_list=None, cells_across_list=None, 
                    random_state=42, plot_splits=False):
@@ -130,11 +136,10 @@ def build_datasets(data_raw_path, save_dir=None, n_splits=3, train_size_list=Non
     
     sl_df = gpd.read_file(data_raw_path)
     sl_df = sl_df.rename(col_name_dictionary, axis=1)
-    Xdata, Ydata, partitions_builder, pid = blue_conduit_preprocessing(sl_df, cols_metadata)
-    train_idx, test_idx = split_index(Xdata, 
+    Xdata, Ydata, partitions_builder, location = blue_conduit_preprocessing(sl_df, cols_metadata)
+    train_pid, test_pid = split_index(Xdata, 
                                       Ydata, 
                                       partitions_builder, 
-                                      pid, 
                                       n_splits, 
                                       train_size_list, 
                                       cells_across_list,
@@ -147,27 +152,27 @@ def build_datasets(data_raw_path, save_dir=None, n_splits=3, train_size_list=Non
         
         Xdata_path = f'{save_dir}/Xdata.csv'
         Ydata_path = f'{save_dir}/Ydata.csv'
-        train_idx_path = f'{save_dir}/train_index.npz'
-        test_idx_path = f'{save_dir}/test_index.npz'
-        pid_path = f'{save_dir}/pid.gpkg'
+        train_pid_path = f'{save_dir}/train_pid.npz'
+        test_pid_path = f'{save_dir}/test_pid.npz'
+        location_path = f'{save_dir}/location.gpkg'
         builder_path = f'{save_dir}/partitions_builder.pk'
         
         # Save Xdata and Ydata as regular csv
         for df, path in zip([Xdata, Ydata],[Xdata_path, Ydata_path]):
-            df.to_csv(path, index=False)
+            df.to_csv(path, index=True)
         
         # Save train and test index as npz
-        np.savez(train_idx_path, **train_idx)
-        np.savez(test_idx_path, **test_idx)
+        np.savez(train_pid_path, **train_pid)
+        np.savez(test_pid_path, **test_pid)
         
-        # Save pid with geometry as 
-        pid.to_file(pid_path, driver="GPKG")
+        # Save location with geometry as 
+        location.to_file(location_path, driver="GPKG")
         
         # Save the partition builder to recreate partitions
         with open(builder_path, 'wb') as outp:  # Overwrites any existing file.
             pickle.dump(partitions_builder, outp, pickle.HIGHEST_PROTOCOL)
             
-    return Xdata, Ydata, pid, train_idx, test_idx, partitions_builder
+    return Xdata, Ydata, location, train_pid, test_pid, partitions_builder
 
 def format_npz_dict(dict_):
     dict_ = dict(dict_)
@@ -177,16 +182,16 @@ def format_npz_dict(dict_):
 def load_datasets(load_dir):
     Xdata_path = f'{load_dir}/Xdata.csv'
     Ydata_path = f'{load_dir}/Ydata.csv'
-    train_idx_path = f'{load_dir}/train_index.npz'
-    test_idx_path = f'{load_dir}/test_index.npz'
-    pid_path = f'{load_dir}/pid.gpkg'
+    train_pid_path = f'{load_dir}/train_pid.npz'
+    test_pid_path = f'{load_dir}/test_pid.npz'
+    location_path = f'{load_dir}/location.gpkg'
     builder_path = f'{load_dir}/partitions_builder.pk'
     
-    Xdata = pd.read_csv(Xdata_path)
-    Ydata = pd.read_csv(Ydata_path)
-    pid = gpd.read_file(pid_path) 
-    train_idx = format_npz_dict(np.load(train_idx_path, allow_pickle=True))
-    test_idx = format_npz_dict(np.load(test_idx_path, allow_pickle=True))
+    Xdata = pd.read_csv(Xdata_path).set_index('pid')
+    Ydata = pd.read_csv(Ydata_path).set_index('pid')
+    location = gpd.read_file(location_path).set_index('pid')
+    train_pid = format_npz_dict(np.load(train_pid_path, allow_pickle=True))
+    test_pid = format_npz_dict(np.load(test_pid_path, allow_pickle=True))
     
     with open(builder_path, 'rb') as f:  # Overwrites any existing file.
         try:
@@ -194,7 +199,7 @@ def load_datasets(load_dir):
         except:
             partitions_builder = pickle5.load(f)
     
-    return Xdata, Ydata, pid, train_idx, test_idx, partitions_builder
+    return Xdata, Ydata, location, train_pid, test_pid, partitions_builder
 
 def load_predictions(pred_dir, probs_prefix='baseline'):
     """Loads specific types of predictions with .npz endings
@@ -210,31 +215,31 @@ def load_predictions(pred_dir, probs_prefix='baseline'):
     test_preds = format_npz_dict(np.load(test_path, allow_pickle=True))
     return train_preds, test_preds
 
-def select_data(Xdata, Ydata, pid, train_idx, test_idx, train_pred_all, test_pred_all, 
+def select_data(Xdata, Ydata, location, train_pid, test_pid, train_pred_all, test_pred_all, 
                 partitions_builder=None, train_size=0.1, n_hexagons=47, split=0, 
-                return_pid=False, generate_hexagons=True):
+                return_location=False, generate_hexagons=False):
     """Selects data for a single split"""
 
     train_size = f'ts_{train_size}'
     resolution = f'res_{n_hexagons}'
 
     # Find necessary indices for sorting first
-    train_index = train_idx[train_size][resolution][split].values
-    test_index = test_idx[train_size][resolution][split].values
+    train_pid = train_pid[train_size][resolution][split]
+    test_pid = test_pid[train_size][resolution][split]
 
     # Subset data as necessary
-    Xtrain = Xdata.iloc[train_index]
-    Xtest = Xdata.iloc[test_index]
-    Ytrain = Ydata.iloc[train_index]['dangerous'].values.astype('float')
-    Ytest = Ydata.iloc[test_index]['dangerous'].values.astype('float')
+    Xtrain = Xdata.loc[train_pid]
+    Xtest = Xdata.loc[test_pid]
+    Ytrain = Ydata.loc[train_pid]['dangerous'].values.astype('float')
+    Ytest = Ydata.loc[test_pid]['dangerous'].values.astype('float')
     train_pred = train_pred_all[train_size][resolution][split]
     test_pred = test_pred_all[train_size][resolution][split]
 
-    # Since PID info is not likely to be needed, only
+    # Since location info is not likely to be needed, only
     # optionally return this information
     result = {}
-    result['train_index'] = train_index
-    result['test_index'] = test_index
+    result['train_pid'] = train_pid
+    result['test_pid'] = test_pid
     result['Xtrain'] = Xtrain
     result['Xtest'] = Xtest
     result['Ytrain'] = Ytrain
@@ -242,15 +247,11 @@ def select_data(Xdata, Ydata, pid, train_idx, test_idx, train_pred_all, test_pre
     result['train_pred'] = train_pred
     result['test_pred'] = test_pred
     
-    if return_pid:
-        pid_train = pid.iloc[train_index].pid.values
-        pid_test = pid.iloc[test_index].pid.values
-        pid_lat_lon_train = pid.iloc[train_index]
-        pid_lat_lon_test = pid.iloc[test_index]
-        result['pid_train'] = pid_train
-        result['pid_test'] = pid_test
-        result['pid_lat_lon_train'] = pid_lat_lon_train
-        result['pid_lat_lon_test'] = pid_lat_lon_test
+    if return_location:
+        location_train = location.loc[train_pid]
+        location_test = location.loc[test_pid]
+        result['location_train'] = location_train
+        result['location_test'] = location_test
 
     if generate_hexagons:
         hexagons = partitions_builder.Partition(partition_type='hexagon', num_cells_across=n_hexagons)
@@ -262,5 +263,5 @@ if __name__ == '__main__':
     data_dir = '../../data'
     data_raw_path = f'{data_dir}/raw/flint_sl_materials/'
     save_dir = f'{data_dir}/processed'
-    Xdata, Ydata, pid, train_idx, test_idx, partitions_builder = build_datasets(data_raw_path, save_dir=save_dir)
+    Xdata, Ydata, location, train_pid, test_pid, partitions_builder = build_datasets(data_raw_path, save_dir=save_dir)
     
