@@ -101,7 +101,7 @@ data_dir = '../data'
 data_raw_path = f'{data_dir}/raw/flint_sl_materials/'
 save_dir = f'{data_dir}/processed'
 
-Xdata, Ydata, pid, train_idx, test_idx, partitions_builder = build_datasets(data_raw_path, save_dir=save_dir)
+Xdata, Ydata, location, train_pid, test_pid, partitions_builder = build_datasets(data_raw_path, save_dir=save_dir)
 ```
 ## Load datasets
 
@@ -126,29 +126,21 @@ from blue_conduit_spatial.utilities import load_datasets
 data_dir = '../data'
 load_dir = f'{data_dir}/processed'
 
-Xdata, Ydata, pid, train_idx, test_idx, partitions_builder = load_datasets(load_dir)
+Xdata, Ydata, location, train_pid, test_pid, partitions_builder = load_datasets(load_dir)
 
-train_idx.keys()
+train_pid.keys()
 >>> dict_keys(['ts_0.1', 'ts_0.3', 'ts_0.4', 'ts_0.6', 'ts_0.7', 'ts_0.9'])
 
-train_idx['ts_0.1'].keys()
+train_pid['ts_0.1'].keys()
 >>> dict_keys(['res_5', 'res_10', 'res_22', 'res_47', 'res_99'])
 
-train_idx_['ts_0.1']['res_5']
->>> array([Int64Index([1863, 1864, 1865, 1866, 1867, 1868, 1869, 1870, 1871, 1872,
-                   ...
-                   4221, 4222, 4223, 4224, 4225, 4226, 4227, 4228, 4229, 4230],
-                   dtype='int64', length=2368)                                  ,
-           Int64Index([6778, 6779, 6780, 6781, 6782, 6783, 6784, 6785, 6786, 6787,
-                   ...
-                   9154, 9155, 9156, 9157, 9158, 9159, 9160, 9161, 9162, 9163],
-                   dtype='int64', length=2386)                                  ,
-           Int64Index([20632, 20633, 20634, 20635, 20636, 20637, 20638, 20639, 20640,
-                   20641,
-                   ...
-                   23567, 23568, 23569, 23570, 23571, 23572, 23573, 23574, 23575,
-                   23576],
-                   dtype='int64', length=2945)                                    ],
+train_pid['ts_0.1']['res_5']
+>>> array([array([4012476011, 4012476025, 4012476026, ..., 4002459029, 4002378013,
+              4002459031])                                                    ,
+       array([4011380043, 4011456005, 4011456012, ..., 4011131001, 4011129001,
+              4011133029])                                                    ,
+       array([4118455026, 4119132003, 4119132004, ..., 4130129025, 4130131006,
+              4130104034])                                                    ],
       dtype=object)
 ```
 
@@ -199,7 +191,7 @@ pred_dir = f'{data_dir}/Predictions'
 pid_lat_lon_path = f'{load_dir}/pid.gpkg'
 
 # Load data for all hexagons resolutions, train sizes and splits
-Xdata, Ydata, pid, train_idx, test_idx, partitions_builder = load_datasets(load_dir)
+Xdata, Ydata, location, train_pid, test_pid, partitions_builder = load_datasets(load_dir)
 train_pred_all_bl, test_pred_all_bl = load_predictions(pred_dir, probs_prefix='baseline')
 train_pred_all_diff, test_pred_all_diff = load_predictions(pred_dir, probs_prefix='diffusion')
 
@@ -211,9 +203,9 @@ split = 0
 args = {    
     'Xdata': Xdata,
     'Ydata': Ydata,
-    'pid': pid,
-    'train_idx': train_idx,
-    'test_idx': test_idx,
+    'location': location,
+    'train_pid': train_idx,
+    'test_pid': test_idx,
     'train_size': train_size,
     'split': split,
     'return_pid': False,
@@ -317,30 +309,3 @@ dig_stats_df = dig_savings(dig_stats_df, 'Baseline', 'Diffusion')
 dig_stats_df.head()
 ```
 ![hrc-comparison](plots/table_digs_lead.png)
-
-# Plots
-
-## Plot precision-recall curve
-
-```
-import numpy as np
-import pandas as pd
-
-from blue_conduit_spatial.evaluation import plot_pr_curve
-
-data_dir = '../data'
-y_train_path = f'{data_dir}/processed/Ytrain.csv'
-bc_yhat_train_path = f'{data_dir}/processed/predictions/jared_train_yhat.csv'
-
-y_train = pd.read_csv(y_train_path)['dangerous'].values
-y_hat_train = pd.read_csv(bc_yhat_train_path).values[:,1]
-y_hat_random = [np.random.rand(len(y_train))]
-
-mod_list = [y_hat_train, y_hat_random]
-labels = ['BC Baseline', 'Random']
-
-plot_pr_curve(y_train, mod_list, labels=labels)
-```
-
-![pr-sample](plots/pr_sample.png)
-
