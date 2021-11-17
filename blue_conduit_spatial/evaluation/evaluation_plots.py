@@ -47,7 +47,7 @@ def plot_hit_rate_curve(y_true,
                         figdir=None, 
                         mode='all',
                         parcel_df=None,
-                        index_list=None,
+                        pid_list=None,
                         threshold_init=None, 
                         title_suffix=None,
                         **kwargs
@@ -91,11 +91,11 @@ def plot_hit_rate_curve(y_true,
         if mode == 'all':
             hit_rates, pred_probs = generate_hit_rate_curve(y_true, mod)
         elif mode == 'partition':
-            if sum([x is None for x in [parcel_df, index_list, threshold_init]]) > 0:
+            if sum([x is None for x in [parcel_df, pid_list, threshold_init]]) > 0:
                 raise ValueError(
                     "In partition mode, none of parcel_df, index_list, or threshold_init can  be none")
             hit_rates, pred_probs, _ = generate_hit_rate_curve_by_partition(parcel_df, 
-                index_list, 
+                pid_list, 
                 y_true, 
                 mod, 
                 threshold_init, 
