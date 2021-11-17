@@ -82,7 +82,7 @@ def generate_hit_rate_curve(y_true, y_pred):
     return hit_rates, y_comb_sorted[:,1]
 
 def generate_hit_rate_curve_by_partition(parcel_df, 
-                                        index_list, 
+                                        pid_list, 
                                         y_true, 
                                         y_pred, 
                                         threshold_init, 
@@ -100,7 +100,7 @@ def generate_hit_rate_curve_by_partition(parcel_df,
     
     Args:
         parcel_df: Ordered dataframe passing reference to pid and partition_ID
-        index_list: Array-like list of indices in the i.e. test set (as used 
+        pid_list: Array-like list of indices in the i.e. test set (as used 
           to divide train/test data)
         y_true: True values (should be in order of `index_list`). Sk-learn API.
         y_pred: Prediction probabilities at the parcel-level; SK-Learn API. 
@@ -114,7 +114,7 @@ def generate_hit_rate_curve_by_partition(parcel_df,
     """
     # Create temporary dataframe containing only necessary features for filtering
     # process (initial parcel_df has many features; done to save space)
-    df = parcel_df.iloc[index_list].copy()
+    df = parcel_df.set_index('pid').loc[pid_list].copy()
     df['pred_prob'] = y_pred.copy()
     df['true_val'] = y_true.copy()
     df = df[['partition_ID', 'pred_prob', 'true_val']]
