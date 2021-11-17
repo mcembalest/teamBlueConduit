@@ -235,6 +235,14 @@ def select_data(Xdata, Ydata, location, train_pid, test_pid, train_pred_all, tes
     train_pred = train_pred_all[train_size][resolution][split]
     test_pred = test_pred_all[train_size][resolution][split]
 
+    # Find global index (i.e. this can be used for the graph)
+    # within diffusion or GNNs
+    # Set 'original index' as row number, then subset w/.loc[train_index]
+    # and keep only the original index values
+    location['orig_index'] = np.arange(location.shape[0])
+    train_graph_index = location.loc[train_pid, 'orig_index'].values
+    test_graph_index = location.loc[test_pid, 'orig_index'].values
+
     # Since location info is not likely to be needed, only
     # optionally return this information
     result = {}
@@ -246,6 +254,8 @@ def select_data(Xdata, Ydata, location, train_pid, test_pid, train_pred_all, tes
     result['Ytest'] = Ytest
     result['train_pred'] = train_pred
     result['test_pred'] = test_pred
+    result['train_graph_index'] = train_graph_index
+    result['test_graph_index'] = test_graph_index
     
     if return_location:
         location_train = location.loc[train_pid]
