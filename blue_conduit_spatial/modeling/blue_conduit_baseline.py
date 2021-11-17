@@ -11,26 +11,26 @@ def fit_baseline_model(x_train, y_train):
     mod.fit(x_train, y_train, eval_metric='logloss')
     return mod
 
-def create_data_from_idx(xdata, ydata, train_idx_list, test_idx_list):
-    xtrain = xdata.iloc[train_idx_list]
-    ytrain = ydata.iloc[train_idx_list]['dangerous']
+def create_data_from_idx(xdata, ydata, train_pid_list, test_pid_list):
+    xtrain = xdata.loc[train_pid_list]
+    ytrain = ydata.loc[train_pid_list]['dangerous']
 
-    xtest = xdata.iloc[test_idx_list]
-    ytest = ydata.iloc[test_idx_list]['dangerous']
+    xtest = xdata.loc[test_pid_list]
+    ytest = ydata.loc[test_pid_list]['dangerous']
 
     return xtrain, xtest, ytrain, ytest
 
 def run_baselines(load_dir='../../data/processed', save_dir='../../data/predictions', verbose=True):
-    Xdata, Ydata, pid, train_idx, test_idx, partitions_builder = load_datasets(load_dir)
+    Xdata, Ydata, location, train_pid_all, test_pid_all, partitions_builder  = load_datasets(load_dir)
 
     # Find list of all train percentages available
-    train_pcts = list(train_idx.keys())
+    train_pcts = list(train_pid_all.keys())
 
     # Find resolutions
-    train_resolutions = list(train_idx[train_pcts[0]].keys())
+    train_resolutions = list(train_pid_all[train_pcts[0]].keys())
 
     # Calculate number of splits per percentage
-    n_split = len(train_idx[train_pcts[0]][train_resolutions[0]])
+    n_split = len(train_pid_all[train_pcts[0]][train_resolutions[0]])
 
     pred_probs_train_dict = {}
     pred_probs_test_dict = {}
@@ -44,8 +44,8 @@ def run_baselines(load_dir='../../data/processed', save_dir='../../data/predicti
             test_probs_res = []
             for s in range(n_split):
                 # Create data specific to the model being fit
-                selected_train_idx = train_idx[t][res][s]
-                selected_test_idx = test_idx[t][res][s]
+                selected_train_idx = train_pid_all[t][res][s]
+                selected_test_idx = test_pid_all[t][res][s]
                 xtrain, xtest, ytrain, ytest = create_data_from_idx(Xdata, Ydata, selected_train_idx, selected_test_idx)
 
                 mod = fit_baseline_model(xtrain, ytrain)
