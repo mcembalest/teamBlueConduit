@@ -64,8 +64,8 @@ def run_baselines(load_dir='../../data/processed', save_dir='../../data/predicti
         pred_probs_train_dict[t] = train_probs_pct
         pred_probs_test_dict[t] = test_probs_pct
 
-    np.savez(f'{save_dir}/pred_probs_train.npz', **pred_probs_train_dict)
-    np.savez(f'{save_dir}/pred_probs_test.npz', **pred_probs_test_dict)
+    np.savez(f'{save_dir}/baseline_pred_probs_train.npz', **pred_probs_train_dict)
+    np.savez(f'{save_dir}/baseline_pred_probs_test.npz', **pred_probs_test_dict)
 
 if __name__ == '__main__':
     run_baselines(verbose=True)
