@@ -51,6 +51,7 @@ def plot_hit_rate_curve(y_true,
                         threshold_init=None, 
                         title_suffix=None,
                         min_hit_rate=0.0,
+                        custom_cmap=None,
                         **kwargs
                         ):
     """Generates plot of hit rate curve with three potential modes:
@@ -126,7 +127,13 @@ def plot_hit_rate_curve(y_true,
 
     if labels == None:
         labels = ['Hit rate curve']
-    cmap = cm.get_cmap('Dark2').colors
+    
+    # Only set cmap when a custom cmap is not passed
+    # useful when fixing colors for clarity between models
+    if custom_cmap is None:
+        cmap = cm.get_cmap('Dark2').colors
+    else:
+        cmap = custom_cmap
     
     for i, hr in enumerate(hit_rate_list):
         plt.plot(xs, hr, label=labels[i], color=cmap[i])
