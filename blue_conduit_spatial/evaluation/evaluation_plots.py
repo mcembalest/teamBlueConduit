@@ -50,6 +50,7 @@ def plot_hit_rate_curve(y_true,
                         pid_list=None,
                         threshold_init=None, 
                         title_suffix=None,
+                        min_hit_rate=0.0,
                         **kwargs
                         ):
     """Generates plot of hit rate curve with three potential modes:
@@ -143,7 +144,7 @@ def plot_hit_rate_curve(y_true,
         tot_w_lead = y_true.sum()
         plt.axvline(tot_w_lead, ls='-.', label=f"Total w/Lead; Maximum Performance", color='k')
     
-    plt.ylim(0,1)
+    plt.ylim(min_hit_rate,1)
     plt.legend()
 
     if savefig == True:
