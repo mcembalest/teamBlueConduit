@@ -9,7 +9,7 @@ Harvard IACS Team: Javiera Astudillo, Max Cembalest, Kevin Hare, and Dashiell Yo
 ## Executive Summary
 
 	#TODO
-	
+
 ## Repository organization
 This repository is loosely structured according to the principles laid out by the [Cookiecutter Data Science](https://drivendata.github.io/cookiecutter-data-science/) template produced by DrivenData. This includes a source repository for all code used in development and evaluation of the model frameworks presented, as well as a series of analysis notebooks for exploration and model results. As with a standard packaged Python project, we have developed separate documentation for the use of our tooling. Below is a set of helpful links:
 
@@ -18,41 +18,41 @@ This repository is loosely structured according to the principles laid out by th
 - [Data](/data): For access to the data used in this project, please contact BlueConduit. All analyses can be reproduced once data is ported to this directory.
 - [Notebooks](/notebooks): Notebooks that present (a) exploratory data analyses; (b) model evaluation results; (c) alternative models considered; (d) case studies of diffusion.
 
-## Installation instructions
-To install the `blue_conduit_spatial` package, please follow the instructions below. Note that `gizmo`, in particular 
+## Installation & Data Setup
+To install the `blue_conduit_spatial` package, please follow the instructions below. Note that `gizmo ` is a proprietary package developed by BlueConduit. To obtain access to the package, please contact BlueConduit. Please note that all installs below are done using `pip` install, but if your interpreter calls to `pip3`, the commands can be easily substituted.
 
-# Libraries setup
+1. Update Python. Note that the partner library requires Python >= 3.7. This can be done via:
 
-Start at root folder
-
-## Install local libraries
-
-```
-pip install .
+```shell
+python --version
 ```
 
-## Install requirements
+If you are in a virtual env with conda, you can do it like this:
 
-```
-pip install -r requirements.txt
+```shell
+conda update python
 ```
 
-## Install partner libraries
+2. Install partner libraries. This requires downloading / git cloning the `gizmo` package.
 
-```
+```shell
 cd gizmo
 pip install -e .
 ```
 
-Note that in order to install the partner libraries you need a version of Python >=3.7. If you are in a virtual env with conda, you can do it like this:
+2. Install requirements for `blue_conduit_spatial`. Note: must navigate back to `teamBlueConduit` directory.
 
+```shell
+pip install -r requirements.txt
 ```
-conda update python
+
+3. Install `blue_conduit_spatial`. Execute following command in the `teamBlueConduit` directory.
+
+```shell
+pip install .
 ```
 
-# Data
-
-## Data folder structure
+### Data folder structure
 
 To reduce space locally, we have utilized a consistent structure of the data folders. Below is a brief tutorial on how to replicate the data directories. First, the following directory structure must be created:
 
