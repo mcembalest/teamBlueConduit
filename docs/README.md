@@ -267,14 +267,14 @@ plot_args = {
 plot_hit_rate_curve(**plot_args)
 ```
 
-![hrc-baseline](C:/Users/kch2k/OneDrive/Harvard/AC297r/teamBlueConduit/plots/plot_hrc_baseline.png)
+![hrc-baseline](../plots/plot_hrc_baseline.png)
 
 
 ### Comparison between HRC methods
 
 In the plot below, we demonstrate the differences in performance for the Blue Conduit baseline, for a single split / resolution / set of hyperparameters. Note that most splits / resolutions show qualitatively similar results. Increasing initial threshold improves performance over initial homes. Decreasing increment has similar parameter. Decreasing minimum num. homes improves relative performance over second half of homes.
 
-![hrc-comparison](C:/Users/kch2k/OneDrive/Harvard/AC297r/teamBlueConduit/plots/hit_rate_curve_comparison.png)
+![hrc-comparison](../plots/hit_rate_curve_comparison.png)
 
 ## Generate digging statistics table
 
@@ -324,7 +324,7 @@ dig_stats_df = dig_stats(parcel_gdf, index_list, y_true, y_pred, strat_names=str
 dig_stats_df
 ```
 
-![hrc-comparison](C:/Users/kch2k/OneDrive/Harvard/AC297r/teamBlueConduit/plots/table_digs.png)
+![hrc-comparison](../plots/table_digs.png)
 
 ```
 mode = 'digs_lead_number'
@@ -333,4 +333,4 @@ dig_stats_df = dig_savings(dig_stats_df, 'Baseline', 'Diffusion')
 dig_stats_df.head()
 ```
 
-![hrc-comparison](plots/table_digs_lead.png)
+![hrc-comparison](../plots/table_digs_lead.png)
