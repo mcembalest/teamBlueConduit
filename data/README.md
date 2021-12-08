@@ -8,25 +8,40 @@ To reduce space locally, we have utilized a consistent structure of the data fol
 ...
 ├── data
 │   ├── README.md
+│   ├── predictions
+│   │   ├── GP_pred_probs_test.npz
+│   │   ├── GP_pred_probs_train.npz
+│   │   ├── GP_spatiotemporal_pred_probs_test.npz
+│   │   ├── GP_spatiotemporal_pred_probs_train.npz
+│   │   ├── GP_spatiotemporal_var_pred_probs_test.npz
+│   │   ├── GP_spatiotemporal_var_pred_probs_train.npz
+│   │   ├── GPvar_pred_probs_test.npz
+│   │   ├── GPvar_pred_probs_train.npz
+│   │   ├── GraphSAGE_pred_probs_test.npz
+│   │   ├── GraphSAGE_pred_probs_train.npz
+│   │   ├── baseline_pred_probs_test.npz
+│   │   ├── baseline_pred_probs_train.npz
+│   │   ├── diffusion_pred_probs_test.npz
+│   │   ├── diffusion_pred_probs_train.npz
+│   │   ├── stacking_pred_probs_test.npz
+│   │   └── stacking_pred_probs_train.npz
 │   ├── processed
 │   │   ├── Xdata.csv
 │   │   ├── Ydata.csv
 │   │   ├── cols_metadata.json
-│   │   ├── pid.csv
-│   │   ├── test_index.npz
-│   │   └── train_index.npz
-|   |   └── road_distances.npz
-|   |   └── haversine_distances.npz
-│   ├── raw
-│   │   └── flint_sl_materials
-│   │       ├── flint_sl_materials.cpg
-│   │       ├── flint_sl_materials.dbf
-│   │       ├── flint_sl_materials.prj
-│   │       ├── flint_sl_materials.shp
-│   │       └── flint_sl_materials.shx
-│   ├── predictions
-│   │   ├── pred_probs_train.npz
-│   │   ├── pred_probs_test.npz
+│   │   ├── haversine_distances.npz
+│   │   ├── location.gpkg
+│   │   ├── partitions_builder.pk
+│   │   ├── road_distances.npz
+│   │   ├── test_pid.npz
+│   │   └── train_pid.npz
+│   └── raw
+│       └── flint_sl_materials
+│           ├── flint_sl_materials.cpg
+│           ├── flint_sl_materials.dbf
+│           ├── flint_sl_materials.prj
+│           ├── flint_sl_materials.shp
+│           └── flint_sl_materials.shx
 ...
 ```
 
