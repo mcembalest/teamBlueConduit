@@ -1,7 +1,7 @@
 # Distance Matrix
 
-- [Description of process](##Description)
-- [Code documentation](##Documentation)
+- [Description of process](#Description)
+- [Code documentation](#Documentation)
 
 ## Description
 
@@ -19,8 +19,18 @@ There are two components to this documentation:
      - [OSM on AWS](https://registry.opendata.aws/osm/)
      - [Geofabrik data for Michigan](http://download.geofabrik.de/north-america/us/michigan.html): downloaded minimal size to cover area to save space constraints. 
      - [Helpful blog walking through resources, may need to adjust swap space](https://datawookie.dev/blog/2017/09/building-a-local-osrm-instance/)
+   
 2. Downloading street distances. To limit the number of computations required, we implemented the following algorithmic approach:
 
+   - Find Haversine distances between each parcel
+   - Set a threshold for neighbors (we choose 0.5 km) and only find distances which have neighbors less than this threshold. This dramatically reduces the computation, as under this case the matrix will only have $\sim 2%$ of entries filled.
+
+It is very costly to compute the actual distance between each parcel since this algorithm scales in $O(n^2)$. For Flint, there are roughly 27,000 parcels with a `lead` determination, and thus this matrix will have roughly 675 million entries. Even strategies tested to e.g. fill the upper triangular component of the matrix will scale in $O(n^2)$, as this would require 1 entry for the 2-parcel case (assuming the diagonals, or self-distance, is zero), three for the 3-parcel case, and the 4-parcel case will require 6. By sparisfying the computation ahead of time, we can dramatically speed up the computation time requried.[^2]
+
+## Documentation
+
+###
 
 
 [^1]: In mathematical terms, the Haversine distance is calculated by first determining the central angle between points and then using the radius of the Earth to convert to the distance travelled. 
+[^2]: We also considered a scaling approach with regard to the size of the EC2 instance used. Some resources indicted that OSRM was somewhat parallelized by being written in C++ but we were not able to effectively compute multiple concurrent requests and were able to compute the matrix in 90 minutes with these limits.
