@@ -1,7 +1,7 @@
 # Evaluation
 
 ### Table of Contents
-- [Hit Rate Curve](#Generating Hit Rate Curves)
+- [Hit Rate Curve](##Generating Hit Rate Curves)
 - [Dig Table Statistics](#Generating digging statistics table)
 - [API Reference](#API Reference)
 
@@ -145,7 +145,7 @@ dig_stats_df.head()
 
 ![hrc-comparison](../../plots/table_digs_lead.png)
 
-## ## API Reference
+## API Reference
 
 Note: Most evaluation functions are written to approximate the `sklearn` API for metrics. That is, the general formula will be `metric(y_true, y_pred)` though some metrics require additional parameters to be passed.
 
@@ -240,7 +240,7 @@ Note: Most evaluation functions are written to approximate the `sklearn` API for
   | ------------ | ---------- | ---------------------- | --------------------------------------------------- |
   | `y_true`     | `np.array` | required               | Ground truth labels. Should be binary.              |
   | `y_pred`     | `np.array` | required               | Prediction probabilities or class labels            |
-| `n_bins`     | `int`      | optional; default = 10 | Number of bins to discretize for calibration curve. |
+  | `n_bins`     | `int`      | optional; default = 10 | Number of bins to discretize for calibration curve. |
   
 
   | **Return**   | **Type**   | **Description**                 |
@@ -263,25 +263,25 @@ Note: Most evaluation functions are written to approximate the `sklearn` API for
   5. *Order by probability*: Rather than draw in space, `order_by_prob` can be used to draw the hit rate curves in prob. space rather than sample space.
   6. *Show x-axis as the sample # or the % of test set*.
 
-| **Argument**     | **Type**        | **Status**       | **Description**                                              |
-| ---------------- | --------------- | ---------------- | ------------------------------------------------------------ |
-| `y_true`         | `np.array`      | required         | Ground truth outcomes for dangerous/not dangerous            |
-| `y_pred`         | `np.array`      | required         | Either a list of model prediction probabilities or a single model outcomes |
-| `plot_probs`     | `bool`          | optional; True   | Boolean for whether to include prediction probabilities in model |
-| `labels`         | `list`          | optional; None   | Labels to include if `y_pred` is a list                      |
-| `max_perf`       | `bool`          | optional; False  | Indicates whether to plot the 'maximum performance' or the kink in the curve where a perfect model would decrease performance. |
-| `figsize`        | `tuple`         | optional; (10,6) | Follows `matplotlib` fig size convention of (h, w)           |
-| `savefig`        | `bool`          | optional; False  | Boolean indicating whether to save figure                    |
-| `figname`        | `str`           | optional; None   | Figure filepath / file title (not nec. title of plot)        |
-| `figdir`         | `str`           | optional; None   | Directory to save figure.                                    |
-| `mode`           | `str`           | optional; "all"  | One of "all" or "partition". Controls whether parcels are investigated in unrestricted way or partition-by-partition, ordering by the highest priority partitions. |
-| `parcel_df`      | `gpd.DataFrame` | optional; None   | Required in "partition" mode. Will guide the partitions that each parcel belongs to for aggregating partition investigation decisions. |
-| `pid_list`       | array-like      | optional; None   | Required in "partition" mode. Guides list of which PIDs in `parcel_df` are actually in the test set. |
-| `threshold_init` | `float`         | optional; None   | Required in "partition" mode. Sets the initial threshold for digging. Typically considered to be 0.9 in baseline of `generate_hit_rate_curve_by_partition`. |
-| `title_suffix`   | `str`           | optional; None   | Suffix to be included in plot title.                         |
-| `min_hit_rate`   | `float`         | optional; 0.0    | Min hit rate to show, translates to lower x-limit if not showing entire x-axis |
-| `custom_cmap`    | `list`          | optional; None   | Customizable `matplotlib` `cmap`; must be a list and will otherwise select the 'Dark2' palette. |
-| `show_as_pct`    | `bool`          | optional; False  | Option to show all plots as a percent of the test set.       |
+  | **Argument**     | **Type**        | **Status**       | **Description**                                              |
+  | ---------------- | --------------- | ---------------- | ------------------------------------------------------------ |
+  | `y_true`         | `np.array`      | required         | Ground truth outcomes for dangerous/not dangerous            |
+  | `y_pred`         | `np.array`      | required         | Either a list of model prediction probabilities or a single model outcomes |
+  | `plot_probs`     | `bool`          | optional; True   | Boolean for whether to include prediction probabilities in model |
+  | `labels`         | `list`          | optional; None   | Labels to include if `y_pred` is a list                      |
+  | `max_perf`       | `bool`          | optional; False  | Indicates whether to plot the 'maximum performance' or the kink in the curve where a perfect model would decrease performance. |
+  | `figsize`        | `tuple`         | optional; (10,6) | Follows `matplotlib` fig size convention of (h, w)           |
+  | `savefig`        | `bool`          | optional; False  | Boolean indicating whether to save figure                    |
+  | `figname`        | `str`           | optional; None   | Figure filepath / file title (not nec. title of plot)        |
+  | `figdir`         | `str`           | optional; None   | Directory to save figure.                                    |
+  | `mode`           | `str`           | optional; "all"  | One of "all" or "partition". Controls whether parcels are investigated in unrestricted way or partition-by-partition, ordering by the highest priority partitions. |
+  | `parcel_df`      | `gpd.DataFrame` | optional; None   | Required in "partition" mode. Will guide the partitions that each parcel belongs to for aggregating partition investigation decisions. |
+  | `pid_list`       | array-like      | optional; None   | Required in "partition" mode. Guides list of which PIDs in `parcel_df` are actually in the test set. |
+  | `threshold_init` | `float`         | optional; None   | Required in "partition" mode. Sets the initial threshold for digging. Typically considered to be 0.9 in baseline of `generate_hit_rate_curve_by_partition`. |
+  | `title_suffix`   | `str`           | optional; None   | Suffix to be included in plot title.                         |
+  | `min_hit_rate`   | `float`         | optional; 0.0    | Min hit rate to show, translates to lower x-limit if not showing entire x-axis |
+  | `custom_cmap`    | `list`          | optional; None   | Customizable `matplotlib` `cmap`; must be a list and will otherwise select the 'Dark2' palette. |
+  | `show_as_pct`    | `bool`          | optional; False  | Option to show all plots as a percent of the test set.       |
 
 
 
