@@ -109,6 +109,7 @@ def plot_hit_rate_curve(y_true,
               showing entire x-axis. 
         custom_cmap: Customizable matplotlib cmap; must be a list and will 
               otherwise select the 'Dark2' palette.
+        show_as_pct: Option to show all plots as a percent of the test set.
 
     Returns:
         None
