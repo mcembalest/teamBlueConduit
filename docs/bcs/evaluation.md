@@ -1,9 +1,9 @@
 # Evaluation
 
 ### Table of Contents
-- [Hit Rate Curve](##Generating Hit Rate Curves)
-- [Dig Table Statistics](#Generating digging statistics table)
-- [API Reference](#API Reference)
+- [Hit Rate Curve](##Generating-Hit-Rate-Curves)
+- [Dig Table Statistics](#Generating-digging-statistics-table)
+- [API Reference](#API-Reference)
 
 
 ## Generating Hit Rate Curves
