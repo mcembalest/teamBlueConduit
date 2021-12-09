@@ -5,6 +5,8 @@ from sklearn.metrics import precision_score, classification_report
 from sklearn.calibration import calibration_curve
 import geopandas as gpd
 
+#### HELPER METHODS
+
 def pred2d_to_1d(arr):
     """Helper method for creating 1D array to enforce
     same array dimensions for methods"""
@@ -14,21 +16,7 @@ def pred2d_to_1d(arr):
     else:
         return arr[:,1]
 
-
-def roc_auc_score(y_true, y_pred):
-    """Returns the ROC-AUC Score for some y_true and y_test. Can pass predicted
-    labels as probabilities. Will make determination based on number of columns in
-    y_pred dataset.
-
-    Args:
-        y_true: Ground truth labels. Should be binary.
-        y_pred: Prediction probabilities or class labels
-    
-    Returns:
-        ROC-AUC score for the metrics
-    """
-    yhat = pred2d_to_1d(y_pred)
-    return ras(y_true, y_pred[:,1])
+#### Evaluation Metrics
 
 def hit_rate(y_true, y_pred, threshold=0.5):
     """Returns the 'hit rate'. This is the total predicted positive that actually
@@ -107,10 +95,15 @@ def generate_hit_rate_curve_by_partition(parcel_df,
         threshold_init: Initial threshold for decision-making.
         threshold_increment: Float to decrease threshold by at each iteration.
         min_digs: Minimum number of digs required in a partition to visit.
+        min_digs_increment: Minimum digs to increment at each sweep
+        gen_dig_metadata: Returns the IDs of the digging order as well as the partition IDs
+                 when `True`
 
     Returns:
         hit_rates: Cumulative hit rates for ordered test set
         pred_probs: Predicted probabilities for ordered test set
+        dig_metadata: If False, None. Else a DataFrame containing dig order, ID, and
+                    partition ID.
     """
     # Create temporary dataframe containing only necessary features for filtering
     # process (initial parcel_df has many features; done to save space)
@@ -198,21 +191,6 @@ def generate_hit_rate_curve_by_partition(parcel_df,
 
     return hit_rates, pred_probs, dig_metadata
 
-def generate_calibration_curve(y_true, y_pred, n_bins=10, **kwargs):
-    """Mask (with error handling) for sk-learn calibration curve
-
-    Args:
-        y_true: Ground truth labels. Should be binary.
-        y_pred: Prediction probabilities or class labels
-        n_bins: number of bins to discretize
-    
-    Returns:
-        true_curve: Bucket mean true positives
-        pred_curve: Bucket mean predicted positives
-    """
-    yhat = pred2d_to_1d(y_pred)
-
-    return calibration_curve(y_true, yhat, n_bins=n_bins, **kwargs)
 
 def dig_stats_base(dig_data, criteria, include_cost=False):
     '''
@@ -346,6 +324,36 @@ def dig_savings(dig_stats, model1_str, model2_str):
     dig_stats[savings_col] = dig_stats[savings_col].apply(int_to_curr)
     
     return dig_stats
+
+def roc_auc_score(y_true, y_pred):
+    """Returns the ROC-AUC Score for some y_true and y_test. 
+    
+    Args:
+        y_true: Ground truth labels. Should be binary.
+        y_pred: Prediction probabilities or class labels
+    
+    Returns:
+        ROC-AUC score for the metrics
+    """
+    yhat = pred2d_to_1d(y_pred)
+    return ras(y_true, y_pred[:,1])
+
+def generate_calibration_curve(y_true, y_pred, n_bins=10, **kwargs):
+    """Mask (with error handling) for sk-learn calibration curve
+
+    Args:
+        y_true: Ground truth labels. Should be binary.
+        y_pred: Prediction probabilities or class labels
+        n_bins: number of bins to discretize
+    
+    Returns:
+        true_curve: Bucket mean true positives
+        pred_curve: Bucket mean predicted positives
+    """
+    yhat = pred2d_to_1d(y_pred)
+
+    return calibration_curve(y_true, yhat, n_bins=n_bins, **kwargs)
+
 
 if __name__ == '__main__':
     raw_data = np.load('../../data/predictions/baseline_preds.npz', allow_pickle=True)

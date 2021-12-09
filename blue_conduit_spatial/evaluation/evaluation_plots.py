@@ -34,6 +34,7 @@ def sample_num_to_prob(hit_rates, pred_probs, n=500):
     
     return np.array(hit_rate_output), thresholds[1:]
 
+##### PLOTTING FUNCTIONS
 
 def plot_hit_rate_curve(y_true, 
                         y_pred, 
@@ -52,13 +53,32 @@ def plot_hit_rate_curve(y_true,
                         title_suffix=None,
                         min_hit_rate=0.0,
                         custom_cmap=None,
+                        show_as_pct=False,
                         **kwargs
                         ):
-    """Generates plot of hit rate curve with three potential modes:
-        (1) Single model, no prediction probabilities;
-        (2) Multiple models, no prediction probabilities;
-        (3) Single model, prediction probabilities;
-        (4) Multiple models, prediction probabilities
+    """Generates plot of hit rate curve with highly flexible set of options.
+
+    Important Design Choices:
+        1. # of models: Can pass multiple models as a list to `y_pred` and 
+                        concurrent number of labels as list to `labels`.
+
+        2. Investigation 'mode': Can investigate plots with mode = 'all' which
+                        will dig parcels with highest P(lead). If `mode` == 'partition'
+                        curve will be done by partition & sweeps. Controlled via
+                        `threshold_init` parameter.
+
+        3. Plot prediction probability?: Can plot only hit rate curve or also prediction
+                        probability alongside for each model as dotted line.
+
+        4. Draw a line with maximum possible performance: this mode (controlled via) `max_perf`
+                        allows user to locate a line where the 'kink' would occur with
+                        perfect (i.e. all lead then all non-lead) behavior.
+
+        5. Order by probability: Rather than draw in space, `order_by_prob` can be used to draw
+                        the hit rate curves in prob. space rather than sample space.
+
+        6. Show x-axis as the sample # or the % of test set.
+        
 
     Args:
         y_true: Ground truth outcomes for dangerous/not dangerous
@@ -74,6 +94,21 @@ def plot_hit_rate_curve(y_true,
         savefig: Boolean indicating whether to save figure
         figname: Figure title
         figdir: Directory to save figure.
+        mode: One of "all" or "partition". Controls whether parcels are 
+              investigated in unrestricted way or partition-by-partition, 
+              ordering by the highest priority partitions.
+        parcel_df: Required in "partition" mode. Will guide the partitions that 
+              each parcel belongs to for aggregating partition investigation decisions.
+        pid_list : Required in "partition" mode. Guides list of which PIDs in `parcel_df` 
+              are actually in the test set.
+        threshold_init: Required in "partition" mode. Sets the initial threshold for 
+             digging. Typically considered to be 0.9 in baseline of 
+             `generate_hit_rate_curve_by_partition`.
+        title_suffix: Suffix to be included in plot title.
+        min_hit_rate: Min hit rate to show, translates to lower x-limit if not 
+              showing entire x-axis. 
+        custom_cmap: Customizable matplotlib cmap; must be a list and will 
+              otherwise select the 'Dark2' palette.
 
     Returns:
         None
@@ -113,11 +148,19 @@ def plot_hit_rate_curve(y_true,
             plt.title(title)
             plt.xlim(1, 0)
         else:
-            xs = np.arange(len(hit_rates))
+            test_N = len(hit_rates)
+            xs = np.arange(test_N)
+
+            # if show as percent, can divide through & mult. by 100
+            pos_str = 'Position'
+            if show_as_pct:
+                xs = (xs / test_N) * 100
+                pos_str = 'Percentile'
+
             if mode == 'partition':
-                plt.xlabel('Position in sample, ordered by partition')
+                plt.xlabel(f'{pos_str} in sample, ordered by partition')
             else:
-                plt.xlabel('Position in sample, order by pred. prob.')
+                plt.xlabel(f'{pos_str} in sample, order by pred. prob.')
             title = "Cumulative Hit Rate Curve by Prediction Probability"
             if not title_suffix is None:
                  title = title + f'\n{title_suffix}'
@@ -168,7 +211,7 @@ def plot_calibration_curve(y_true, y_pred, n_bins=10, labels=None, figsize=(10,6
                 a single model outcomes
         n_bins: Number of bins to discretize for each model
         labels: Labels to include if y_pred is a list
-        figsize: Follows matplotlib figsize directions
+        figsize: Follows `matplotlib` fig size convention of (h, w)
         savefig: Boolean indicating whether to save figure
         figname: Figure title
         figdir: Directory to save figure.
@@ -213,7 +256,7 @@ def plot_pr_curve(y_true, y_pred, labels=None,
         dpi: matplotlib dpi
         figsize: Follows matplotlib fig size convention of (h, w)
         savefig: Boolean indicating whether to save figure
-        figname: Figure title
+        figname: Figure filepath / file title (not nec. title of plot)
         figdir: Directory to save figure.
 
     Returns:

@@ -37,10 +37,10 @@ The Road Distance Matrix provides a data structure for populating a $(N, N)$ mat
 
 This is the base class for the calculation of the Road Distances. Contains method to instantiate and fit, as well as save out matrix as a compressed `numpy` array (`.npz`) format.
 
-	| **Arguments** | **Type**       | **Status** | Description                                                  |
-	| :------------- | -------------- | ---------- | ------------------------------------------------------------ |
-	| `N`           | `int`          | required   | The size of the $(N, N)$ matrix; used to create a preset array size to raise memory issues if necessary. |
-	| `df`          | `pd.DataFrame` | required   | DataFrame containing at least three columns: Latitude, Longitude, and `pid`. Could be updated in future depending on requirements. |
+  | **Arguments** | **Type**       | **Status** | Description                                                  |
+  | :------------- | -------------- | ---------- | ------------------------------------------------------------ |
+  | `N`           | `int`          | required   | The size of the $(N, N)$ matrix; used to create a preset array size to raise memory issues if necessary. |
+  | `df`          | `pd.DataFrame` | required   | DataFrame containing at least three columns: Latitude, Longitude, and `pid`. Could be updated in future depending on requirements. |
 
 ###### External-facing methods
 
