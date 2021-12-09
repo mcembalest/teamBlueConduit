@@ -12,6 +12,16 @@ from gizmo.spatial_partitions import partitions
 from .metadata import cols_metadata_dict
 from sklearn.model_selection import train_test_split, GroupShuffleSplit
 
+### HELPER FUNCTIONS
+
+def format_npz_dict(dict_):
+    dict_ = dict(dict_)
+    dict_ = dict([(k,v.item()) for k,v in dict_.items()])
+    return dict_
+
+
+### ALL FUNCTIONS
+
 def get_partitions_builder(data):
     data['parcel_id'] = data.pid
     data['has_lead'] = data.dangerous
@@ -174,11 +184,6 @@ def build_datasets(data_raw_path, save_dir=None, n_splits=3, train_size_list=Non
             
     return Xdata, Ydata, location, train_pid, test_pid, partitions_builder
 
-def format_npz_dict(dict_):
-    dict_ = dict(dict_)
-    dict_ = dict([(k,v.item()) for k,v in dict_.items()])
-    return dict_
-
 def load_datasets(load_dir):
     Xdata_path = f'{load_dir}/Xdata.csv'
     Ydata_path = f'{load_dir}/Ydata.csv'
@@ -207,7 +212,15 @@ def load_predictions(pred_dir, probs_prefix='baseline'):
     Note that files should be saved as '{prefix}_pred_probs_train.npz
     and '{prefix}pred_probs_test.npz'. For the baseline models this will be
     simply 'pred_probs_train.npz', but for e.g. diffusion it will be
-    'diffusion_pred_probs_train.npz'. In this case"""
+    'diffusion_pred_probs_train.npz'.
+    
+    Args:
+        pred_dir: Relative path to directory where predictions are stored.
+        probs_prefix: Prefix for probabilities to load, e.g. 'diffusion', 'baseline'.
+
+    Returns:
+        train_preds, test_preds
+    """
     train_path = f"{pred_dir}/{probs_prefix}_pred_probs_train.npz"
     test_path = f"{pred_dir}/{probs_prefix}_pred_probs_test.npz"
 
@@ -218,7 +231,33 @@ def load_predictions(pred_dir, probs_prefix='baseline'):
 def select_data(Xdata, Ydata, location, train_pid, test_pid, train_pred_all, test_pred_all, 
                 partitions_builder=None, train_size=0.1, n_hexagons=47, split=0, 
                 return_location=False, generate_hexagons=False):
-    """Selects data for a single split"""
+    """Selects data for a single split, hex size, train size combination
+    
+    Args:
+        Xdata: The dataframe containing all features for every parcel including 
+                both the train and test set. Will be internally determined which to select.
+        Ydata: Array-like containing all outcome information for all parcels
+        train_pid: Dictionary containing all training PIDs by train / hex / split ordering
+        test_pid: Dictionary containing all test PIDs by train / hex / split ordering
+        train_pred_all: Dictionary containing all training predictions for the model
+        train_pred_all: Dictionary containing all test predictions for the model
+        partitions_builder: if generating hexagons, must pass a PartitionsBuilder
+                object from the `gizmo` package.
+        train_size: share of data in train set
+        n_hexagons: number of hexagons across grid
+        split: split number
+        return_location: If `True`, this will return the latitude / longitude
+                of the training and test parcels
+        generate_hexagons: If `True` will generate hexagons object necessary for
+                mapping and aggregation
+    
+    Returns:
+        result_dict
+            keys: [train_pid, test_pid, Xtrain, Ytrain, Xtest, Ytest, Ytest, 
+                        train_pred, test_pred, train_graph_index, test_graph_index, 
+                        location_train, location_test, hexagons] ## only if specified
+                
+    """
 
     train_size = f'ts_{train_size}'
     resolution = f'res_{n_hexagons}'
