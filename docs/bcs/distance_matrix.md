@@ -29,8 +29,40 @@ It is very costly to compute the actual distance between each parcel since this 
 
 ## Documentation
 
-###
+### [RoadDistanceMatrix](../../blue_conduit_spatial/distance_matrix/road_distances.py)
 
+The Road Distance Matrix provides a data structure for populating a $(N, N)$ matrix for $N$ parcels in Flint, MI, but could likely be taken for other locations as well. This structure and simple API were used to create the $(N, N)$ matrix used for all graph-based methods (including Diffusion and GNNs).
+
+##### class `RoadDistanceMatrix`
+
+This is the base class for the calculation of the Road Distances. Contains method to instantiate and fit, as well as save out matrix as a compressed `numpy` array (`.npz`) format.
+
+| **Arguments** | **Type**       | **Status** | Description                                                  |
+| ------------- | -------------- | ---------- | ------------------------------------------------------------ |
+| `N`           | `int`          | required   | The size of the $(N, N)$ matrix; used to create a preset array size to raise memory issues if necessary. |
+| `df`          | `pd.DataFrame` | required   | DataFrame containing at least three columns: Latitude, Longitude, and `pid`. Could be updated in future depending on requirements. |
+
+###### External-facing methods
+
+- `fit(base_dists, ip, limit=0.5`):
+
+  Fits the road distance matrix based on a passed base distance. User can pass `np.zeros(shape=(N,N))` to produce a matrix that is entirely filled. Not set as default behavior to prevent unintentional mistakes and overloads. Not recommended due to size / space / efficiency concerns, but may be necessary if computation only occurs once.
+
+  | **Arguments** | **Type**   | **Status**              | Description                                                  |
+  | :------------ | ---------- | ----------------------- | ------------------------------------------------------------ |
+  | `base_dists`  | `np.array` | required                | Base distance array of size $(N, N)$; no default option to prevent accidental overloading of OSRM server. |
+  | `ip`          | `str`      | required                | IP Address to request data from (i.e. where OSRM is set up)  |
+  | `limit`       | `float`    | optional; default = 0.5 | limit (in KM) of homes to be consider; default = 0.5km       |
+
+- `save(filepath)`
+
+  Saves two components to a compressed `.npz` file. First is a mapping of the `pid` supplied in the constructor to the index of the $(N, N)$ matrix. This is useful in case the mapping of `pid` and ordering changes (likely) and since the compressed `np.array` does not allow for naming.
+
+  | **Arguments** | **Type** | **Status** | Description                             |
+  | :------------ | -------- | ---------- | --------------------------------------- |
+  | `filepath`    | `str`    | required   | Filepath to save compressed `npz` file. |
+
+  
 
 [^1]: In mathematical terms, the Haversine distance is calculated by first determining the central angle between points and then using the radius of the Earth to convert to the distance travelled. 
 [^2]: We also considered a scaling approach with regard to the size of the EC2 instance used. Some resources indicted that OSRM was somewhat parallelized by being written in C++ but we were not able to effectively compute multiple concurrent requests and were able to compute the matrix in 90 minutes with these limits.
