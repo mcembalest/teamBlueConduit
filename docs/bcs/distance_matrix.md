@@ -1,7 +1,7 @@
 # Distance Matrix
 
 - [Description of process](#Description)
-- [Code documentation](#Documentation)
+- [API Reference](#API-Reference)
 
 ## Description
 
@@ -27,7 +27,7 @@ There are two components to this documentation:
 
 It is very costly to compute the actual distance between each parcel since this algorithm scales in $O(n^2)$. For Flint, there are roughly 27,000 parcels with a `lead` determination, and thus this matrix will have roughly 675 million entries. Even strategies tested to e.g. fill the upper triangular component of the matrix will scale in $O(n^2)$, as this would require 1 entry for the 2-parcel case (assuming the diagonals, or self-distance, is zero), three for the 3-parcel case, and the 4-parcel case will require 6. By sparisfying the computation ahead of time, we can dramatically speed up the computation time requried.[^2]
 
-## Documentation
+## API Reference
 
 ### [RoadDistanceMatrix](../../blue_conduit_spatial/distance_matrix/road_distances.py)
 
@@ -37,10 +37,10 @@ The Road Distance Matrix provides a data structure for populating a $(N, N)$ mat
 
 This is the base class for the calculation of the Road Distances. Contains method to instantiate and fit, as well as save out matrix as a compressed `numpy` array (`.npz`) format.
 
-  | **Arguments** | **Type**       | **Status** | Description                                                  |
-  | :------------- | -------------- | ---------- | ------------------------------------------------------------ |
-  | `N`           | `int`          | required   | The size of the $(N, N)$ matrix; used to create a preset array size to raise memory issues if necessary. |
-  | `df`          | `pd.DataFrame` | required   | DataFrame containing at least three columns: Latitude, Longitude, and `pid`. Could be updated in future depending on requirements. |
+| **Arguments** | **Type**       | **Status** | Description                                                  |
+| :------------- | -------------- | ---------- | ------------------------------------------------------------ |
+| `N`           | `int`          | required   | The size of the $(N, N)$ matrix; used to create a preset array size to raise memory issues if necessary. |
+| `df`          | `pd.DataFrame` | required   | DataFrame containing at least three columns: Latitude, Longitude, and `pid`. Could be updated in future depending on requirements. |
 
 ###### External-facing methods
 

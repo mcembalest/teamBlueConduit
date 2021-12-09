@@ -10,7 +10,18 @@ Harvard IACS Team: Javiera Astudillo, Max Cembalest, Kevin Hare, and Dashiell Yo
 
 	#TODO
 
+## Helpful Links
+### Documents
+- Final Technical Report
+- Blog Post [In GitHub], [Medium]
+### API Reference
+- [Utilities](docs/bcs/utilities.md#API-Reference)
+- [Modeling](docs/bcs/modeling.md)
+- [Evaluation](docs/bcs/evaluation.md#API-Reference)
+- [Distance Matrix / Data Processing](docs/bcs/distance_matrix.md#API-Reference)
+
 ## Repository organization
+
 This repository is loosely structured according to the principles laid out by the [Cookiecutter Data Science](https://drivendata.github.io/cookiecutter-data-science/) template produced by DrivenData. This includes a source repository for all code used in development and evaluation of the model frameworks presented, as well as a series of analysis notebooks for exploration and model results. As with a standard packaged Python project, we have developed separate documentation for the use of our tooling. Below is a set of helpful links:
 
 - [`blue_conduit_spatial`](/blue_conduit_spatial): a Python package implementing the baseline and diffusion methods described in this project, as well as data loading and evaluation tooling.
