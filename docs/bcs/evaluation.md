@@ -88,7 +88,9 @@ In the plot below, we demonstrate the differences in performance for the Blue Co
 
 ## Generating Costs Curves
 
-This library provides a `CostsHandler` class for calculating costs curves for multiple strategies. Each cost curve plot depicts the costs of removing **x** lead pipes within the test set for a specific `ts` (train size) and `res` (hexagon_resolution) scenario. Costs were calculated following [BlueConduit's previous work](https://storage.googleapis.com/flint-storage-bucket/d4gx_2019%20(2).pdf). That is, every lead pipe removal cost is estimated at $5,000 and every non-lead digging at $3,000. It can alternatively be set to depict the costs of removing **p** *share* lead pipes with a `norm_x` argument. This class expects a path to the folder containing the predictions of the strategies being evaluated. 
+This library provides a `CostsHandler` class for calculating costs curves for multiple strategies. Each cost curve plot depicts the costs of removing **x** lead pipes within the test set for a specific `ts` (train size) and `res` (hexagon_resolution) scenario. Costs were calculated following [BlueConduit's previous work](https://storage.googleapis.com/flint-storage-bucket/d4gx_2019%20(2).pdf). That is, every lead pipe removal cost is estimated at $5,000 and every non-lead digging at $3,000. It can alternatively be set to depict the costs of removing **p** *share* lead pipes with a `norm_x` argument. 
+
+Note that the `CostsHandler` does not fit any models, but rather expects their predictions for all strategies, hexagon resolutions and train sizes to be precomputed in a `pred_dir` folder path. Further, if savings are calculated, it requires to know the name of the *baseline* model within the `pred_dir`. 
 
 ### Sample usage
 
@@ -202,6 +204,47 @@ Note: Most evaluation functions are written to approximate the `sklearn` API for
   | ------------ | ---------- | ------------------------------- |
   | `true_curve` | `np.array` | Bucket mean true positives      |
   | `pred_curve` | `np.array` | Bucket mean predicted positives |
+  
+- `CostsHandler.__init__(Ydata, train_pid, test_pid, partitions_builder, pred_dir, models_prefix, compute_savings=True, 
+                         bl_prefix='baseline')`
+
+  Instantiating a new CostsHandler object for computing costs of hit rate curves simultaneosuly for multiple strategies and its corresponding savings plots. It requires the outputs from the `load_datasets` function from the `utilities` module.
+  
+__init__(self, Ydata, train_pid, test_pid, partitions_builder, pred_dir, models_prefix, compute_savings=True, 
+                 bl_prefix='baseline')
+                 
+__init__(self, Ydata, train_pid, test_pid, partitions_builder, pred_dir, models_prefix, compute_savings=True, 
+                 bl_prefix='baseline')
+
+  | **Argument**            | **Type**                                              | **Status**  | **Description**                                     |
+  | ----------------------- | ----------                                            | ----------- | --------------------------------------------------- |
+  | `Ydata`                 | pd.DataFrame                                          | required    | Output from `load_datasets`         |        
+  | `train_pid`             | dict                                                  | required    | Output from `load_datasets`         |        
+  | `test_pid`              | dict                                                  | required    | Output from `load_datasets`         |        
+  | `partitions_builder`    | gizmo.spatial_partitions.partitions.PartitionsBuilder | required    | Output from `load_datasets`         |        
+  | `pred_dir`              | str                                                   | required    | Path to the predictions folder      |        
+  | `models_prefix`         | list                                                  | required    | Strategies/models names string list following their prefix names in `pred_dir`|        
+  | `compute_savings`       | str                                                   | optional    | Whether to include savings compared to the baseline in the costs computation |        
+  | `bl_prefix`             | str                                                   | optional    | Baseline prefix within the `models_prefix` list. Required if `compute_svaings` is set to True|         
+  
+
+  | **Return**   | 
+  | ------------ | 
+  | None         | 
+
+- `CostsHandler.compute_costs(ts_list, res_list)`
+
+  Compute cost curves for all strategies associated to the `CostsHandler` object for all train sizes and hexagon resolutions in `ts_list` and `res_list` correspondingly. 
+
+  | **Argument** | **Type**   | **Status**             | **Description**                                     |
+  | ------------ | ---------- | ---------------------- | --------------------------------------------------- |
+  | `ts_list`    | list       | required               | List or iterable of train sizes floats.             |
+  | `res_list`   | list       | required               | List or iterable of hexagon resolutions integers.   |
+  
+
+  | **Return**   | **Type**   | **Description**                                                                             |
+  | ------------ | ---------- | ------------------------------------------------------------------------------------------- |
+  | `costs`      | `dict`     | Returns a nested costs dictionary indexed by (1)train size, (2)resolution and (3) strategy  |
 
 ###### Plots
 
@@ -255,21 +298,19 @@ Note: Most evaluation functions are written to approximate the `sklearn` API for
   | `figname`    | `str`      | optional; None   | Figure filepath / file title (not nec. title of plot)        |
   | `figdir`     | `str`      | optional; None   | Directory to save figure.                                    |
 
-  
+- `CostsHandler.plot_savings(res, ts, savefig=False, norm_x=True, zoom_perc=0.9, plot_dir=None, 
+                             ylim_cum=4e5, ylim_avg=100)`
 
-- ```plot_pr_curve(y_ture, y_pred, labels=None, figsize=(10,6), dpi=90, savefig=False, figname=None, figdir=None)```
+  Plots savings of each strategy in `CostsHandler` object for a given hexagon resolution and train size scenario.
 
-  Generates precisio-recall curve plot for single or multiple models
-
-  | **Argument** | **Type**   | **Status**       | **Description**                                              |
-  | ------------ | ---------- | ---------------- | ------------------------------------------------------------ |
-  | `y_true`     | `np.array` | required         | Ground truth outcomes for dangerous/not dangerous            |
-  | `y_pred`     | `np.array` | required         | Either a list of model prediction probabilities or a single model outcomes |
-  | `labels`     | `list`     | optional; None   | Labels to include if `y_pred` is a list                      |
-  | `dpi`        | `int`      | optional; 90     | `matplotlib` dpi                                             |
-  | `figsize`    | `tuple`    | optional; (10,6) | Follows `matplotlib` fig size convention of (h, w)           |
-  | `savefig`    | `bool`     | optional; False  | Boolean indicating whether to save figure                    |
-  | `figname`    | `str`      | optional; None   | Figure filepath / file title (not nec. title of plot)        |
-  | `figdir`     | `str`      | optional; None   | Directory to save figure.                                    |
-
+  | **Argument** | **Type**   | **Status**       | **Description**                                                                              |
+  | ------------ | ---------- | ---------------- | -------------------------------------------------------------------------------------------- |
+  | `res`        | `float`    | required         | Hexagon resolution scenario.                                                                 |
+  | `ts`         | `np.array` | required         | Train size scenario.                                                                         |
+  | `savefig`    | `bool`     | optional; False  | Whether to save the figure. If so, a `plot_dir` is required                                  |
+  | `norm_x`     | `bool`     | optional; True   | Whether to label the x axis as number of lead pipres or share of lead pipes                  |
+  | `zoom_perc`  | `float`    | optional; 0.9    | Whether to cutoff the x axis to the first `zoom_perc`% of lead pipes to improve readability. |
+  | `plot_dir`   | `bool`     | optional; str    | Required if `savefig` is set to `True`                                                       |
+  | `ylim_cum`   | `int`      | optional; 4e5    | Set the limits of the y axis for the cumulative savings plot (left plot).                    |
+  | `ylim_avg`   | `int`      | optional; 100    | Set the limits of the y axis for the average savings plot (right plot).                      |
   
