@@ -209,12 +209,6 @@ Note: Most evaluation functions are written to approximate the `sklearn` API for
                          bl_prefix='baseline')`
 
   Instantiating a new CostsHandler object for computing costs of hit rate curves simultaneosuly for multiple strategies and its corresponding savings plots. It requires the outputs from the `load_datasets` function from the `utilities` module.
-  
-__init__(self, Ydata, train_pid, test_pid, partitions_builder, pred_dir, models_prefix, compute_savings=True, 
-                 bl_prefix='baseline')
-                 
-__init__(self, Ydata, train_pid, test_pid, partitions_builder, pred_dir, models_prefix, compute_savings=True, 
-                 bl_prefix='baseline')
 
   | **Argument**            | **Type**                                              | **Status**  | **Description**                                     |
   | ----------------------- | ----------                                            | ----------- | --------------------------------------------------- |
@@ -226,11 +220,6 @@ __init__(self, Ydata, train_pid, test_pid, partitions_builder, pred_dir, models_
   | `models_prefix`         | list                                                  | required    | Strategies/models names string list following their prefix names in `pred_dir`|        
   | `compute_savings`       | str                                                   | optional    | Whether to include savings compared to the baseline in the costs computation |        
   | `bl_prefix`             | str                                                   | optional    | Baseline prefix within the `models_prefix` list. Required if `compute_svaings` is set to True|         
-  
-
-  | **Return**   | 
-  | ------------ | 
-  | None         | 
 
 - `CostsHandler.compute_costs(ts_list, res_list)`
 
