@@ -86,64 +86,27 @@ In the plot below, we demonstrate the differences in performance for the Blue Co
 
 ![hrc-comparison](../../plots/hit_rate_curve_comparison.png)
 
-## Generating digging statistics table
+## Generating Costs Curves
 
-**```dig_stats(parcel_gdf, index_list, y_true, y_pred, strat_names=None, bins=15, mode='digs_lead_number', hr_args=None)```**
-
-```
-Returns
----------------------
-  dig_stats_df: pd.DataFrame
-```
-
-Calculate digging statistics for each digging strategy within `y_pred` based on `mode` criteria.
-Bins the data for improving the insights, following the digging order imposed by the hit rate curve
-ordered by partition.
-
-Modes:
-
-* `digs_number`: parcels are binned in batches with equal number of diggings.
-* `digs_lead_number`: parcels are binned in batches with equal number of lead diggings.
-
-**```dig_savings(dig_stats_df, model1_str, model2_str)```**
-
-Meant to be used when `dig_stats` is in `mode=digs_lead_number`. Comparison of lead pipe replacement cost between
-`model1_str` and `model2_str` which should correspond to names in the `strat_names` passed to `dig_stats`.
-Generates a new column in the `dig_stats_df` with the cost savings segmented every `N` replaced pipes.
-
-```
-Returns
----------------------
-  dig_stats_df: pd.DataFrame
-```
+This library provides a `CostsHandler` class for calculating costs curves for multiple strategies. Each cost curve plot depicts the costs of removing $x$ lead pipes within the test set for a specific `ts` (train size) and `res` (hexagon_resolution) scenario. Costs were calculated following [BlueConduit's previous work](https://storage.googleapis.com/flint-storage-bucket/d4gx_2019%20(2).pdf). That is, every lead pipe removal cost is estimated at $5,000 and every non-lead digging at $3,000. It can alternatively be set to depict the costs of removing $p$ *share* lead pipes with a `norm_x` argument. This class expects a path to the folder containing the predictions of the strategies being evaluated. 
 
 ### Sample usage
 
 ```
-# Set `dig_stats` arguments
-parcel_gdf = parcel_gdf
-index_list = data_bl['test_index']
-y_true = data_bl['Ytest']
-y_pred = [data_bl['test_pred'], data_diff['test_pred']]
-strat_names = ['Baseline', 'Diffusion']
-bins = 15
+from blue_conduit_spatial.utilities import load_datasets
+from blue_conduit_spatial.evaluation import CostsHandler
 
-# Get digging statistics
-mode = 'digs_number'
-dig_stats_df = dig_stats(parcel_gdf, index_list, y_true, y_pred, strat_names=strat_names, bins=bins, mode=mode)
-dig_stats_df
+data_dir = '../../data'
+load_dir = f'{data_dir}/Processed'
+pred_dir = f'{data_dir}/Predictions'
+
+Xdata, Ydata, location, train_pid, test_pid, partitions_builder = load_datasets(load_dir)
+models_costs = ['baseline', 'diffusion', 'stacking', 'GP_spatiotemporal']
+costs_handler = CostsHandler(Ydata, train_pid, test_pid, partitions_builder, pred_dir, models_costs, bl_prefix='baseline')
+costs_handler.plot_savings(res=22, ts=0.1, savefig=True, norm_x=True, plot_dir='../../plots/savings')
 ```
 
-![hrc-comparison](../../plots/table_digs.png)
-
-```
-mode = 'digs_lead_number'
-dig_stats_df = dig_stats(parcel_gdf, index_list, y_true, y_pred, strat_names=strat_names, bins=bins, mode=mode)
-dig_stats_df = dig_savings(dig_stats_df, 'Baseline', 'Diffusion')
-dig_stats_df.head()
-```
-
-![hrc-comparison](../../plots/table_digs_lead.png)
+![hrc-comparison](../../plots/savings/savings_norm_ts_0.1_n_hex_22.png.png)
 
 ## API Reference
 
@@ -204,20 +167,6 @@ Note: Most evaluation functions are written to approximate the `sklearn` API for
   | `hit_rates`               | `np.array`     | Cumulative hit rates for ordered test set                    |
   | `predicted_probabilities` | `np.array`     | Predicted probabilities for ordered test set                 |
   | `dig_metadata`            | `pd.DataFrame` | If `gen_dig_metadata` is False, None. Else a DataFrame containing dig order, ID, and partition ID. |
-
-
-
-- `dig_stats_base(dig_data, criteria, include_cost=False)`
-
-  - *Javiera*
-
-- `dig_stats(parcel_gdf, index_list, y_true, y_pred, strat_names=None, bins=15, mode='dig_lead_number', hr_args=None)`
-
-  - *Javiera*
-
-- `dig_savings(dig_stats, model1_str, model2_str)`
-
-  - *Javiera*
 
 - `roc_auc_score(y_true, y_pred)`
 
