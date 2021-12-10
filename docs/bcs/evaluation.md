@@ -86,64 +86,35 @@ In the plot below, we demonstrate the differences in performance for the Blue Co
 
 ![hrc-comparison](../../plots/hit_rate_curve_comparison.png)
 
-## Generating digging statistics table
+## Generating Costs Curves
 
-**```dig_stats(parcel_gdf, index_list, y_true, y_pred, strat_names=None, bins=15, mode='digs_lead_number', hr_args=None)```**
+This library provides a `CostsHandler` class for calculating costs curves for multiple strategies. Each cost curve plot depicts the costs of removing **x** lead pipes within the test set for a specific `ts` (train size) and `res` (hexagon_resolution) scenario. Costs were calculated following [BlueConduit's previous work](https://storage.googleapis.com/flint-storage-bucket/d4gx_2019%20(2).pdf). That is, every lead pipe removal cost is estimated at $5,000 and every non-lead digging at $3,000. This plot can alternatively be set to depict the costs of removing **p** *share* lead pipes with a `norm_x` argument. Each strategy savings curve is calculated as an average within all test splits for a given train size and hexagon_resolution. Finally, they are smoothed out with a LOWESS (Locally Weighted Scatterplot Smoothing) technique to improve interpretability; the original curve is in light shadow, and the smooth curve is plotted on top of that.
 
-```
-Returns
----------------------
-  dig_stats_df: pd.DataFrame
-```
-
-Calculate digging statistics for each digging strategy within `y_pred` based on `mode` criteria.
-Bins the data for improving the insights, following the digging order imposed by the hit rate curve
-ordered by partition.
-
-Modes:
-
-* `digs_number`: parcels are binned in batches with equal number of diggings.
-* `digs_lead_number`: parcels are binned in batches with equal number of lead diggings.
-
-**```dig_savings(dig_stats_df, model1_str, model2_str)```**
-
-Meant to be used when `dig_stats` is in `mode=digs_lead_number`. Comparison of lead pipe replacement cost between
-`model1_str` and `model2_str` which should correspond to names in the `strat_names` passed to `dig_stats`.
-Generates a new column in the `dig_stats_df` with the cost savings segmented every `N` replaced pipes.
-
-```
-Returns
----------------------
-  dig_stats_df: pd.DataFrame
-```
+Note that the `CostsHandler` does not fit any models but instead expects their predictions for all strategies, hexagon resolutions, and train sizes to be precomputed in a `pred_dir` folder path. Further, if savings are calculated, it requires to know the name of the *baseline* model within the `pred_dir`. 
 
 ### Sample usage
 
 ```
-# Set `dig_stats` arguments
-parcel_gdf = parcel_gdf
-index_list = data_bl['test_index']
-y_true = data_bl['Ytest']
-y_pred = [data_bl['test_pred'], data_diff['test_pred']]
-strat_names = ['Baseline', 'Diffusion']
-bins = 15
+from blue_conduit_spatial.utilities import load_datasets
+from blue_conduit_spatial.evaluation import CostsHandler
 
-# Get digging statistics
-mode = 'digs_number'
-dig_stats_df = dig_stats(parcel_gdf, index_list, y_true, y_pred, strat_names=strat_names, bins=bins, mode=mode)
-dig_stats_df
+data_dir = '../../data'
+load_dir = f'{data_dir}/Processed'
+pred_dir = f'{data_dir}/Predictions'
+
+Xdata, Ydata, location, train_pid, test_pid, partitions_builder = load_datasets(load_dir)
+models_costs = ['baseline', 'diffusion', 'stacking', 'GP_spatiotemporal']
+costs_handler = CostsHandler(Ydata, train_pid, test_pid, partitions_builder, pred_dir, models_costs, bl_prefix='baseline')
+costs_handler.plot_savings(res=22, ts=0.1, norm_x=True)
 ```
 
-![hrc-comparison](../../plots/table_digs.png)
+![hrc-comparison](../../plots/savings/savings_norm_ts_0.1_n_hex_22.png)
 
 ```
-mode = 'digs_lead_number'
-dig_stats_df = dig_stats(parcel_gdf, index_list, y_true, y_pred, strat_names=strat_names, bins=bins, mode=mode)
-dig_stats_df = dig_savings(dig_stats_df, 'Baseline', 'Diffusion')
-dig_stats_df.head()
+costs_handler.plot_savings(res=22, ts=0.1, norm_x=False)
 ```
 
-![hrc-comparison](../../plots/table_digs_lead.png)
+![hrc-comparison](../../plots/savings/savings_ts_0.1_n_hex_22.png)
 
 ## API Reference
 
@@ -205,20 +176,6 @@ Note: Most evaluation functions are written to approximate the `sklearn` API for
   | `predicted_probabilities` | `np.array`     | Predicted probabilities for ordered test set                 |
   | `dig_metadata`            | `pd.DataFrame` | If `gen_dig_metadata` is False, None. Else a DataFrame containing dig order, ID, and partition ID. |
 
-
-
-- `dig_stats_base(dig_data, criteria, include_cost=False)`
-
-  - *Javiera*
-
-- `dig_stats(parcel_gdf, index_list, y_true, y_pred, strat_names=None, bins=15, mode='dig_lead_number', hr_args=None)`
-
-  - *Javiera*
-
-- `dig_savings(dig_stats, model1_str, model2_str)`
-
-  - *Javiera*
-
 - `roc_auc_score(y_true, y_pred)`
 
   Returns the ROC-AUC Score for some y_true and y_test. 
@@ -247,8 +204,38 @@ Note: Most evaluation functions are written to approximate the `sklearn` API for
   | ------------ | ---------- | ------------------------------- |
   | `true_curve` | `np.array` | Bucket mean true positives      |
   | `pred_curve` | `np.array` | Bucket mean predicted positives |
+  
+- `CostsHandler.__init__(Ydata, train_pid, test_pid, partitions_builder, pred_dir, models_prefix, compute_savings=True, 
+                         bl_prefix='baseline')`
 
-###### Plots
+  Instantiating a new CostsHandler object for computing costs of hit rate curves simultaneosuly for multiple strategies and its corresponding savings plots. It requires the outputs from the `load_datasets` function from the `utilities` module.
+
+  | **Argument**            | **Type**                                              | **Status**  | **Description**                                     |
+  | ----------------------- | ----------                                            | ----------- | --------------------------------------------------- |
+  | `Ydata`                 | pd.DataFrame                                          | required    | Output from `load_datasets`         |        
+  | `train_pid`             | dict                                                  | required    | Output from `load_datasets`         |        
+  | `test_pid`              | dict                                                  | required    | Output from `load_datasets`         |        
+  | `partitions_builder`    | gizmo.spatial_partitions.partitions.PartitionsBuilder | required    | Output from `load_datasets`         |        
+  | `pred_dir`              | str                                                   | required    | Path to the predictions folder      |        
+  | `models_prefix`         | list                                                  | required    | Strategies/models names string list following their prefix names in `pred_dir`|        
+  | `compute_savings`       | str                                                   | optional    | Whether to include savings compared to the baseline in the costs computation |        
+  | `bl_prefix`             | str                                                   | optional    | Baseline prefix within the `models_prefix` list. Required if `compute_svaings` is set to True|         
+
+- `CostsHandler.compute_costs(ts_list, res_list)`
+
+  Compute cost curves for all strategies associated to the `CostsHandler` object for all train sizes and hexagon resolutions in `ts_list` and `res_list` correspondingly. 
+
+  | **Argument** | **Type**   | **Status**             | **Description**                                     |
+  | ------------ | ---------- | ---------------------- | --------------------------------------------------- |
+  | `ts_list`    | list       | required               | List or iterable of train sizes floats.             |
+  | `res_list`   | list       | required               | List or iterable of hexagon resolutions integers.   |
+  
+
+  | **Return**   | **Type**   | **Description**                                                                             |
+  | ------------ | ---------- | ------------------------------------------------------------------------------------------- |
+  | `costs`      | `dict`     | Returns a nested costs dictionary indexed by (1)train size, (2)resolution and (3) strategy  |
+
+#### Plots
 
 - `plot_hit_rate_curve(y_true, y_pred, plot_probs=False, labels=None, max_perf=False, order_by_prob=False, figsize=(10,6), savefig=False, figname=None, figdir=None, mode='all', parcel_df=None, pid_list=None, threshold_init=None, title_suffix=None, min_hit_rate=0.0, custom_cmap=None, **kwargs)`
 
@@ -300,21 +287,19 @@ Note: Most evaluation functions are written to approximate the `sklearn` API for
   | `figname`    | `str`      | optional; None   | Figure filepath / file title (not nec. title of plot)        |
   | `figdir`     | `str`      | optional; None   | Directory to save figure.                                    |
 
-  
+- `CostsHandler.plot_savings(res, ts, savefig=False, norm_x=True, zoom_perc=0.9, plot_dir=None, 
+                             ylim_cum=4e5, ylim_avg=100)`
 
-- ```plot_pr_curve(y_ture, y_pred, labels=None, figsize=(10,6), dpi=90, savefig=False, figname=None, figdir=None)```
+  Plots savings of each strategy in `CostsHandler` object for a given hexagon resolution and train size scenario.
 
-  Generates precisio-recall curve plot for single or multiple models
-
-  | **Argument** | **Type**   | **Status**       | **Description**                                              |
-  | ------------ | ---------- | ---------------- | ------------------------------------------------------------ |
-  | `y_true`     | `np.array` | required         | Ground truth outcomes for dangerous/not dangerous            |
-  | `y_pred`     | `np.array` | required         | Either a list of model prediction probabilities or a single model outcomes |
-  | `labels`     | `list`     | optional; None   | Labels to include if `y_pred` is a list                      |
-  | `dpi`        | `int`      | optional; 90     | `matplotlib` dpi                                             |
-  | `figsize`    | `tuple`    | optional; (10,6) | Follows `matplotlib` fig size convention of (h, w)           |
-  | `savefig`    | `bool`     | optional; False  | Boolean indicating whether to save figure                    |
-  | `figname`    | `str`      | optional; None   | Figure filepath / file title (not nec. title of plot)        |
-  | `figdir`     | `str`      | optional; None   | Directory to save figure.                                    |
-
+  | **Argument** | **Type**   | **Status**       | **Description**                                                                              |
+  | ------------ | ---------- | ---------------- | -------------------------------------------------------------------------------------------- |
+  | `res`        | `float`    | required         | Hexagon resolution scenario.                                                                 |
+  | `ts`         | `np.array` | required         | Train size scenario.                                                                         |
+  | `savefig`    | `bool`     | optional; False  | Whether to save the figure. If so, a `plot_dir` is required                                  |
+  | `norm_x`     | `bool`     | optional; True   | Whether to label the x axis as number of lead pipres or share of lead pipes                  |
+  | `zoom_perc`  | `float`    | optional; 0.9    | Whether to cutoff the x axis to the first `zoom_perc`% of lead pipes to improve readability. |
+  | `plot_dir`   | `bool`     | optional; str    | Required if `savefig` is set to `True`                                                       |
+  | `ylim_cum`   | `int`      | optional; 4e5    | Set the limits of the y axis for the cumulative savings plot (left plot).                    |
+  | `ylim_avg`   | `int`      | optional; 100    | Set the limits of the y axis for the average savings plot (right plot).                      |
   
