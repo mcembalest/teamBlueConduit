@@ -209,6 +209,8 @@ class CostsHandler:
                 t1 = time()
                 msg = f'Costs computation for ts:{ts}, n_hexagons:{res} done. | Total time: {t1-t0:.2f} s.'
                 print(msg)
+        
+        return self.costs
 
     def plot_savings(self, res, ts, savefig=False, norm_x=True, zoom_perc=0.9, plot_dir=None, 
                      ylim_cum=4e5, ylim_avg=100):
