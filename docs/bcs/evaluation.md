@@ -88,7 +88,7 @@ In the plot below, we demonstrate the differences in performance for the Blue Co
 
 ## Generating Costs Curves
 
-This library provides a `CostsHandler` class for calculating costs curves for multiple strategies. Each cost curve plot depicts the costs of removing $x$ lead pipes within the test set for a specific `ts` (train size) and `res` (hexagon_resolution) scenario. Costs were calculated following [BlueConduit's previous work](https://storage.googleapis.com/flint-storage-bucket/d4gx_2019%20(2).pdf). That is, every lead pipe removal cost is estimated at $5,000 and every non-lead digging at $3,000. It can alternatively be set to depict the costs of removing $p$ *share* lead pipes with a `norm_x` argument. This class expects a path to the folder containing the predictions of the strategies being evaluated. 
+This library provides a `CostsHandler` class for calculating costs curves for multiple strategies. Each cost curve plot depicts the costs of removing **x** lead pipes within the test set for a specific `ts` (train size) and `res` (hexagon_resolution) scenario. Costs were calculated following [BlueConduit's previous work](https://storage.googleapis.com/flint-storage-bucket/d4gx_2019%20(2).pdf). That is, every lead pipe removal cost is estimated at $5,000 and every non-lead digging at $3,000. It can alternatively be set to depict the costs of removing **p** *share* lead pipes with a `norm_x` argument. This class expects a path to the folder containing the predictions of the strategies being evaluated. 
 
 ### Sample usage
 
@@ -103,10 +103,16 @@ pred_dir = f'{data_dir}/Predictions'
 Xdata, Ydata, location, train_pid, test_pid, partitions_builder = load_datasets(load_dir)
 models_costs = ['baseline', 'diffusion', 'stacking', 'GP_spatiotemporal']
 costs_handler = CostsHandler(Ydata, train_pid, test_pid, partitions_builder, pred_dir, models_costs, bl_prefix='baseline')
-costs_handler.plot_savings(res=22, ts=0.1, savefig=True, norm_x=True, plot_dir='../../plots/savings')
+costs_handler.plot_savings(res=22, ts=0.1, norm_x=True)
 ```
 
-![hrc-comparison](../../plots/savings/savings_norm_ts_0.1_n_hex_22.png.png)
+![hrc-comparison](../../plots/savings/savings_norm_ts_0.1_n_hex_22.png)
+
+```
+costs_handler.plot_savings(res=22, ts=0.1, norm_x=False)
+```
+
+![hrc-comparison](../../plots/savings/savings_ts_0.1_n_hex_22.png)
 
 ## API Reference
 
