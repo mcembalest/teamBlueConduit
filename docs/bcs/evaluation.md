@@ -235,7 +235,7 @@ Note: Most evaluation functions are written to approximate the `sklearn` API for
   | ------------ | ---------- | ------------------------------------------------------------------------------------------- |
   | `costs`      | `dict`     | Returns a nested costs dictionary indexed by (1)train size, (2)resolution and (3) strategy  |
 
-##### Plots
+#### Plots
 
 - `plot_hit_rate_curve(y_true, y_pred, plot_probs=False, labels=None, max_perf=False, order_by_prob=False, figsize=(10,6), savefig=False, figname=None, figdir=None, mode='all', parcel_df=None, pid_list=None, threshold_init=None, title_suffix=None, min_hit_rate=0.0, custom_cmap=None, **kwargs)`
 
