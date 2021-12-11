@@ -54,6 +54,7 @@ def plot_hit_rate_curve(y_true,
                         min_hit_rate=0.0,
                         custom_cmap=None,
                         show_as_pct=False,
+                        return_obj=False,
                         **kwargs
                         ):
     """Generates plot of hit rate curve with highly flexible set of options.
@@ -110,9 +111,10 @@ def plot_hit_rate_curve(y_true,
         custom_cmap: Customizable matplotlib cmap; must be a list and will 
               otherwise select the 'Dark2' palette.
         show_as_pct: Option to show all plots as a percent of the test set.
+        return_obj: Will return matplotlib objects to be manipulated for production
 
     Returns:
-        None
+        fig: If return_obj, a matplotlib figure; otherwise returns nothing
     """
     if mode not in ['all', 'partition']:
         raise ValueError(f"Mode must be one of 'all' or 'partition'.")
@@ -200,6 +202,8 @@ def plot_hit_rate_curve(y_true,
 
     if savefig == True:
         plt.savefig(figdir + figname)
+    elif return_obj == True:
+        return fig 
     else:
         plt.show()
 
