@@ -15,28 +15,27 @@ This README file provides an index of notebooks, categorized by topic. The areas
 
 ### BlueConduit
 
-| **Notebook Title**            | **Link**                                                | **Description**                                              | **Run Location** | **STATUS** |
-| ----------------------------- | ------------------------------------------------------- | ------------------------------------------------------------ | ---------------- | ---------- |
-| Example_Model_BlueConduit     | [link](blueconduit/Example_Model_BlueConduit.ipynb)     | Initial document provided by BlueConduit to demonstrate use of XGBoost model and Flint data. For illustrative purposes. | Local            | Keep       |
-| Spatial_Partitions_Demo_Flint | [link](blueconduit/Spatial_Partitions_Demo_Flint.ipynb) | BlueConduit-provided notebook describing use of spatial partitioning tools in `gizmo` with Flint Parcels data. | Local            | Keep       |
+| **Notebook Title**            | **Link**                                                | **Description**                                              | **Run Location** | Priority |
+| ----------------------------- | ------------------------------------------------------- | ------------------------------------------------------------ | ---------------- | -------- |
+| Example_Model_BlueConduit     | [link](blueconduit/Example_Model_BlueConduit.ipynb)     | Initial document provided by BlueConduit to demonstrate use of XGBoost model and Flint data. For illustrative purposes. | Local            | Low      |
+| Spatial_Partitions_Demo_Flint | [link](blueconduit/Spatial_Partitions_Demo_Flint.ipynb) | BlueConduit-provided notebook describing use of spatial partitioning tools in `gizmo` with Flint Parcels data. | Local            | Low      |
 
 ### Data Processing
 
-| **Notebook Title** | **Link**                                       | **Description**                                              | **Run Location** | **STATUS**       |
-| ------------------ | ---------------------------------------------- | ------------------------------------------------------------ | ---------------- | ---------------- |
-| Shapefile EDA      | [link](data_processing/Shapefile EDA.ipynb)    | Initial exploratory data analysis if Flint Parcels shapefile; incomplete version currently remains on GitHub. | Local            | Discuss removing |
-| DistanceMatrices   | [link](data_processing/DistanceMatrices.ipynb) | Uses OpenStreetMaps Routing Machine (OSRM) spun up on an AWS instance to find the street distances, as well as Haversine distances, between all parcels in Flint, MI. | Colab            | Keep             |
+| **Notebook Title** | **Link**                                       | **Description**                                              | **Run Location** | Priority |
+| ------------------ | ---------------------------------------------- | ------------------------------------------------------------ | ---------------- | -------- |
+| DistanceMatrices   | [link](data_processing/DistanceMatrices.ipynb) | Uses OpenStreetMaps Routing Machine (OSRM) spun up on an AWS instance to find the street distances, as well as Haversine distances, between all parcels in Flint, MI. | Colab            | Medium   |
 
 ### Modeling / Evaluation
 
-| **Notebook Title**                     | **Link**                                                     | **Description**                                              | **Run Location** | **STATUS**       |
-| -------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ---------------- | ---------------- |
-| Flint_BC_Model_W_Plots                 | [link](modeling/Flint_BC_Model_W_Plots.ipynb)                | Contains initial usage of evaluation utilities for BlueConduit baseline models. | Local            | Discuss Removing |
-| Compare_Evaluation_Methods_Naive_Model | [link](modeling/Compare_Evaluation_Methods_Naive_Model.ipynb) | (1) Performs demonstration of `select_data` function; (2) Compares performance of baseline with parcel-ordering and partition-ordering; (3) Compares to other naïve baselines. | Colab            | Keep             |
-| DiffusionModel                         | [link](modeling/DiffusionModel.ipynb)                        | Sets up & runs basic diffusion model.                        | Colab            | Keep             |
-| Hyperparameter_Tuning_Diffusion        | [link](modeling/Hyperparameter_Tuning_Diffusion.ipynb)       | Runs hyperparameter tuning grid for diffusion model and stores optimal results. Also presents results with highlighting for convenient viewing. | Colab            | Keep             |
-|                                        |                                                              |                                                              |                  |                  |
-|                                        |                                                              |                                                              |                  |                  |
+| **Notebook Title**                     | **Link**                                                     | **Description**                                              | **Run Location** | **Priority** |
+| -------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ---------------- | ------------ |
+| Flint_BC_Model_W_Plots                 | [link](modeling/Flint_BC_Model_W_Plots.ipynb)                | Contains initial usage of evaluation utilities for BlueConduit baseline models. | Local            | Low          |
+| Compare_Evaluation_Methods_Naive_Model | [link](modeling/Compare_Evaluation_Methods_Naive_Model.ipynb) | (1) Performs demonstration of `select_data` function; (2) Compares performance of baseline with parcel-ordering and partition-ordering; (3) Compares to other naïve baselines. | Colab            | High         |
+| DiffusionModel                         | [link](modeling/DiffusionModel.ipynb)                        | Sets up & runs basic diffusion model.                        | Colab            | High         |
+| Hyperparameter_Tuning_Diffusion        | [link](modeling/Hyperparameter_Tuning_Diffusion.ipynb)       | Runs hyperparameter tuning grid for diffusion model and stores optimal results. Also presents results with highlighting for convenient viewing. | Colab            | Low          |
+|                                        |                                                              |                                                              |                  |              |
+|                                        |                                                              |                                                              |                  |              |
 
 ### Discussion / Analysis
 
@@ -58,10 +57,11 @@ This README file provides an index of notebooks, categorized by topic. The areas
 
 ### Archive
 
-| **Notebook Title**        | **Link**                                  | **Description**                                              | **STATUS** |
-| ------------------------- | ----------------------------------------- | ------------------------------------------------------------ | ---------- |
-| query_osrm_dys            | [link](archive/query_osrm_dys.ipynb)      | Initial OSRM querying done by DYS; overtaken by Find_Road_Distances | To Remove  |
-| Find_Road_Distances       | [link](archive/Find_Road_Distances.ipynb) | Local version for considering road distance formulation      | To Remove  |
-| Naive_Baseline_Comparison |                                           |                                                              | To Remove  |
-| Update_Evaluation         |                                           | overtaken by Compare_Evaluation_Methods_Naive_Model          | To Remove  |
+| **Notebook Title**        | **Link**                                    | **Description**                                              | **STATUS** |
+| ------------------------- | ------------------------------------------- | ------------------------------------------------------------ | ---------- |
+| query_osrm_dys            | [link](archive/query_osrm_dys.ipynb)        | Initial OSRM querying done by DYS; overtaken by Find_Road_Distances | To Remove  |
+| Find_Road_Distances       | [link](archive/Find_Road_Distances.ipynb)   | Local version for considering road distance formulation      | To Remove  |
+| Naive_Baseline_Comparison |                                             |                                                              | To Remove  |
+| Update_Evaluation         |                                             | overtaken by Compare_Evaluation_Methods_Naive_Model          | To Remove  |
+| Shapefile EDA             | [link](data_processing/Shapefile EDA.ipynb) | Initial exploratory data analysis if Flint Parcels shapefile; incomplete version currently remains on GitHub. | Local      |
 
