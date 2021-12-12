@@ -105,16 +105,22 @@ pred_dir = f'{data_dir}/Predictions'
 Xdata, Ydata, location, train_pid, test_pid, partitions_builder = load_datasets(load_dir)
 models_costs = ['baseline', 'diffusion', 'stacking', 'GP_spatiotemporal']
 costs_handler = CostsHandler(Ydata, train_pid, test_pid, partitions_builder, pred_dir, models_costs, bl_prefix='baseline')
-costs_handler.plot_savings(res=22, ts=0.1, norm_x=True)
+costs_handler.plot_costs(res=22, ts=0.1, norm_x=True, metric='savings')
 ```
 
 ![hrc-comparison](../../plots/savings/savings_norm_ts_0.1_n_hex_22.png)
 
 ```
-costs_handler.plot_savings(res=22, ts=0.1, norm_x=False)
+costs_handler.plot_costs(res=22, ts=0.1, norm_x=False, metric='savings')
 ```
 
 ![hrc-comparison](../../plots/savings/savings_ts_0.1_n_hex_22.png)
+
+```
+costs_handler.plot_costs(res=22, ts=0.1, norm_x=False, metric='cost')
+```
+
+![hrc-comparison](../../plots/savings/cost_norm_ts_0.1_n_hex_22.png)
 
 ## API Reference
 
