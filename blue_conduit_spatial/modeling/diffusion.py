@@ -31,8 +31,19 @@ class ServiceLineDiffusion:
             to the training set
         test_indices (array-like): sequence of indices in graph corresponding
             to the test set
+        Ytrain (array-like): true lead values for train set
+        Ytest (array-like): true lead values for test set (within split, etc.)
+        Ytrain_pred (array-like): Baseline predictions for train set; if using
+                e.g. a non-model, could be set to 0.5 * np.ones(Ytrain.shape[0])
+                or some other prior, e.g. np.random.normal(0.5, scale=0.2, size)
+        Ytest_pred (array-like): Similar to `Ytrain_pred` but corresponding
+                to test set.
+        lam (float): lambda parameter governs self-weight in update step; higher
+                lambda corresponds to more weight on self.
         lat_long_df (pd.DataFrame): if plotting, this will be used to localize
-            points on the graph"""
+            points on the graph. Not necessary if not intending to plot
+        
+        """
     def __init__(self, graph, train_indices, test_indices, Ytrain, Ytest, Ytrain_pred, Ytest_pred, lam=0.5, lat_long_df=None):
         self.graph = graph
         self.iter_ct = 1
@@ -54,6 +65,30 @@ class ServiceLineDiffusion:
         self.lat_long_df = lat_long_df
 
     def fit(self, n_iter=1, neighbor_fn=None, neighbor_params=None, distance_function=None, verbose=False):
+        """Fits the diffusion model by running `n_iter` update steps on graph.
+        
+        Args:
+            n_iter (int): Number of iterations (or update steps) to perform
+                        across graph. 
+            neighbor_fn (func): A function to determine the nearest 
+                        neighbors. If None, will use internal graph_Kneighbors
+                        which finds the K-Nearest Neighbors on the graph.
+                        Could update to be custom-wrapped version of Radial
+                        Nearest Neighbors or some other kernel function to
+                        determine neighbors.
+            neighbor_params (dict): Dictionary of parameters to pass to the 
+                        neighbor function. If none, will pass self.graph and 
+                        K = 5. Note: *must* pass self.graph or some other method
+                        to externally determine neighbors.
+            distance_function (func): Function used to determine distance for 
+                        weighted average update steps. If None, will use 1 / distance
+                        provided in the graph.
+            verbose (bool): If True, will report the log-loss after each step;
+                        useful for debugging results.
+            
+        Returns:
+            None
+        """
 
         if (neighbor_params is None) or (neighbor_fn is None):
             self.neighbor_params = {'graph': self.graph, 'K': 5}
@@ -90,13 +125,17 @@ class ServiceLineDiffusion:
         return lead_vals
     
     def predict_proba(self, X, mode=None):
-        """Returns probabilities after lead values. Because this is a non-standard "model" and does not
-        truly take a new X value, it uses the shape of X to determine whether to return the training
-        or test predictions
+        """Returns probabilities after lead values. 
+        
+        Because this is a non-standard "model" and does not
+        truly take a new X value, it uses the shape of X to determine 
+        whether to return the training or test predictions.
         
         Args:
-            - X (pd.DataFrame, np.array): Array of training or test points, used only for its shape
-            - mode (str): One of None, 'train', 'test'. If none, will make decision based on X shape
+            - X (pd.DataFrame, np.array): Array of training or test points, 
+                                            used only for its shape
+            - mode (str): One of None, 'train', 'test'. If none, will make 
+                            decision based on X shape
         
         Returns
             - probs (array): Array of probability of (no lead, lead) in a (N, 2) array to be compliant
@@ -115,7 +154,7 @@ class ServiceLineDiffusion:
             raise AttributeError(f'X passed is not of same shape as either training or test predictions.')
 
     def diffusion_step(self, lead_vals):
-        """Takes a single diffusion step. Separated for clean code practices"""
+        """Takes a single diffusion step across the whole graph"""
         weighted_avg_neighbor_lead = np.average(lead_vals[self.neighbor_idx], axis=1, weights = self.neighbor_weights)
         lead_vals = np.array([self._update_node(node_val, node_idx, weighted_avg_neighbor_lead, self.lam) for node_idx, node_val in enumerate(lead_vals)])
         lead_vals = lead_vals.flatten()
@@ -126,7 +165,23 @@ class ServiceLineDiffusion:
         self.graph = []
 
     def _update_node(self, node_val, node_idx, weighted_avg_neighbor_lead, lam=0.5):
-        """Defines update step for a single node. Can be overwritten, must return between [0,1]"""
+        """Defines update step for a single node. Can be overwritten, must return between [0,1]
+        
+        Note that overriding this method will produce the desired results for a kernel other
+        than the weighted average by distance methodology.
+
+        Args:
+            node_val (float): Current predicted probability for a given node
+            node_idx (np.array[int]): Index of integers corresponding to the graph
+                        indexes of a particular parcel's neighbors. 
+            weighted_avg_neighbor_lead (np.array): Array containing all current weighted
+                        average lead calculations
+            lam (float): Share of weight to place on self vs. weighted avg.
+                        neighbors. 
+        
+        Returns:
+            Updated predicted probability for a given node.
+        """
         #if node_val in [0., 1.]:
         #    return node_val
         #else:
@@ -184,6 +239,7 @@ class ServiceLineDiffusion:
         want it to be a very small weight
         
         Args:
+            graph (np.array): (N, N) array of all current nodes / values are distances
             K (int): Number of neighbors
         Returns:
             neighbor_dist, neighbor_ind : arrays indicating the nearest neighbor and """
@@ -204,7 +260,7 @@ class ServiceLineDiffusion:
     def sqrt_distances(distances):
         """Calculates distance weights as the square root of the distances
 
-        will tend to place more equal weight on further away neighbors since 
+        Will tend to place more equal weight on further away neighbors since 
         e.g. 1/(2 + 1) = 0.33 and 1/(3 + 1) = 0.25 are more spaced than 
         1/(sqrt(2) + 1) = 0.41 and 1/(sqrt(3) + 1) = 0.36"""
         return 1/(1 + np.sqrt(distances))
@@ -229,6 +285,11 @@ class ServiceLineDiffusion:
         elif idx in self.test_indices:
             return self.curr_test_pred[self._idx2testidx(idx)]
         else:
+            ## Note: Due to changes in the processing, if a parcel
+            # is not in the dataset at all, we will use the median
+            # of the entire test set. This defaults to similar to
+            # an unknown probability. Potential area to explore
+            # and improve upon model with more time
             return np.percentile(self.curr_test_pred, 50)
 
 
