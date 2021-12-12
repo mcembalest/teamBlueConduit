@@ -90,7 +90,7 @@ In the plot below, we demonstrate the differences in performance for the Blue Co
 
 This library provides a `CostsHandler` class for calculating costs curves for multiple strategies. Each cost curve plot depicts the costs or savings of removing **x** lead pipes within the test set for a specific `ts` (train size) and `res` (hexagon_resolution) scenario. Costs were calculated following [BlueConduit's previous work](https://storage.googleapis.com/flint-storage-bucket/d4gx_2019%20(2).pdf). That is, every lead pipe removal cost is estimated at $5,000 and every non-lead digging at $3,000. This plot can alternatively be set to depict the costs/savings of removing **p** *share* lead pipes with a `norm_x` argument. Savings are calculated with respect to the Blueconduit's baseline model. Each strategy costs/savings curve is calculated as an average within all test splits for a given train size and hexagon_resolution. Finally, they are smoothed out with a LOWESS (Locally Weighted Scatterplot Smoothing) technique to improve interpretability; the original curve is in light shadow, and the smooth curve is plotted on top of that.
 
-Note that the `CostsHandler` does not fit any models but instead expects their predictions for all strategies, hexagon resolutions, and train sizes to be precomputed in a `pred_dir` folder path. Further, if savings are calculated, it requires to know the name of the *baseline* model within the `pred_dir`. 
+Note that the `CostsHandler` does not fit any models but instead expects their predictions for all strategies, hexagon resolutions, and train sizes to be precomputed in a `pred_dir` folder path. Further, if savings are calculated, it requires to know the name of the *baseline* model within the `pred_dir`. Finally, if the metric is set to plot the `savings` curve then the baseline strategy is depicted as a straight line at `x=0` as the baseline has no relative savings with respect to itself.
 
 ### Sample usage
 
@@ -117,7 +117,7 @@ costs_handler.plot_costs(res=22, ts=0.1, norm_x=False, metric='savings')
 ![hrc-comparison](../../plots/savings/savings_ts_0.1_n_hex_22.png)
 
 ```
-costs_handler.plot_costs(res=22, ts=0.1, norm_x=False, metric='cost')
+costs_handler.plot_costs(res=22, ts=0.1, norm_x=True, metric='cost')
 ```
 
 ![hrc-comparison](../../plots/savings/cost_norm_ts_0.1_n_hex_22.png)
