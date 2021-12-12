@@ -262,6 +262,7 @@ class CostsHandler:
         
         if metric=='savings':
             ax[0].axhline(0, color='k', lw=0.5)
+            ax[1].axhline(0, color='k', lw=0.5)
             ax[0].set_ylim(-abs(4e5),abs(4e5))
             ax[1].set_ylim(-abs(100),abs(100))
             
