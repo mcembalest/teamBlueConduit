@@ -287,19 +287,16 @@ Note: Most evaluation functions are written to approximate the `sklearn` API for
   | `figname`    | `str`      | optional; None   | Figure filepath / file title (not nec. title of plot)        |
   | `figdir`     | `str`      | optional; None   | Directory to save figure.                                    |
 
-- `CostsHandler.plot_savings(res, ts, savefig=False, norm_x=True, zoom_perc=0.9, plot_dir=None, 
-                             ylim_cum=4e5, ylim_avg=100)`
+- `CostsHandler.plot_savings(res, ts, savefig=False, norm_x=True, zoom_perc=0.9, plot_dir=None, metric='savings')`
 
   Plots savings of each strategy in `CostsHandler` object for a given hexagon resolution and train size scenario.
 
-  | **Argument** | **Type**   | **Status**       | **Description**                                                                              |
-  | ------------ | ---------- | ---------------- | -------------------------------------------------------------------------------------------- |
-  | `res`        | `float`    | required         | Hexagon resolution scenario.                                                                 |
-  | `ts`         | `np.array` | required         | Train size scenario.                                                                         |
-  | `savefig`    | `bool`     | optional; False  | Whether to save the figure. If so, a `plot_dir` is required                                  |
-  | `norm_x`     | `bool`     | optional; True   | Whether to label the x axis as number of lead pipres or share of lead pipes                  |
-  | `zoom_perc`  | `float`    | optional; 0.9    | Whether to cutoff the x axis to the first `zoom_perc`% of lead pipes to improve readability. |
-  | `plot_dir`   | `bool`     | optional; str    | Required if `savefig` is set to `True`                                                       |
-  | `ylim_cum`   | `int`      | optional; 4e5    | Set the limits of the y axis for the cumulative savings plot (left plot).                    |
-  | `ylim_avg`   | `int`      | optional; 100    | Set the limits of the y axis for the average savings plot (right plot).                      |
-  
+  | **Argument** | **Type**   | **Status**          | **Description**                                                                              |
+  | ------------ | ---------- | ------------------- | -------------------------------------------------------------------------------------------- |
+  | `res`        | `float`    | required            | Hexagon resolution scenario.                                                                 |
+  | `ts`         | `np.array` | required            | Train size scenario.                                                                         |
+  | `savefig`    | `bool`     | optional; False     | Whether to save the figure. If so, a `plot_dir` is required                                  |
+  | `norm_x`     | `bool`     | optional; True      | Whether to label the x axis as number of lead pipres or share of lead pipes                  |
+  | `zoom_perc`  | `float`    | optional; 0.9       | Whether to cutoff the x axis to the first `zoom_perc`% of lead pipes to improve readability. |
+  | `plot_dir`   | `bool`     | optional;           | Required if `savefig` is set to `True`                                                       |
+  | `metrics`    | `str`      | optional; 'savings' | Required if `savefig` is set to `True`                                                       |
