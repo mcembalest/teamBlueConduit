@@ -110,6 +110,15 @@ train_preds, test_preds = load_datasets(pred_dir)
 ## API Reference
 
 - `get_partitions_builder(data)`
+  Get partitions builder from `gizmo` library to build the train test splits according to the spatial cross-validation framework.
+
+  | **Argument**         | **Type**                                   | **Status**       | **Description**                                                  |
+  | -------------------- | ------------------------------------------ | ---------------- | ---------------------------------------------------------------- |
+  | `data`               | `geopandas.geodataframe.GeoDataFrame`      | required         | Geopandas dataframe with parcels location andd lead information  |
+
+  | **Return**           | **Type**                                                   | **Description**                                              |
+  | -------------------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
+  | `partitions_builder` | `gizmo.spatial_partitions.partitions.partitions_builder`   | Partitions builder object from gizmo library that creates spatial cross-validation splits for different hexgaons resolutions. |
 
 - `blue_conduit_preprocessing(sl_df, cols_metadata)`
 
