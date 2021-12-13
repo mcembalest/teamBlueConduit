@@ -215,8 +215,8 @@ class CostsHandler:
     def plot_costs(self, res, ts, savefig=False, norm_x=True, zoom_perc=0.9, plot_dir=None, metric='savings'):
         # If costs for this resolutions and train size haven't been calculated yet, do so.
         costs = None
-        if f'ts_{ts}' in self.dig_data:
-            if f'res_{res}' in self.dig_data[f'ts_{ts}']:
+        if f'ts_{ts}' in self.costs:
+            if f'res_{res}' in self.costs[f'ts_{ts}']:
                 costs = self.costs[f'ts_{ts}'][f'res_{res}']
         
         if costs is None:

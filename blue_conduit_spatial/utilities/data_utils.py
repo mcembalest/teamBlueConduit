@@ -23,6 +23,16 @@ def format_npz_dict(dict_):
 ### ALL FUNCTIONS
 
 def get_partitions_builder(data):
+    """Get partitions builder from `gizmo` library to build the train test splits
+    accordding the spatial cross-validation framework
+    
+    Args:
+        data: geopandas.geodataframe.GeoDataFrame
+    
+    Returns:
+        partitions_builder: gizmo.spatial_partitions.partitions.partitions_builder
+                
+    """
     data['parcel_id'] = data.pid
     data['has_lead'] = data.dangerous
     data['year_built'] = data['Year Built']
