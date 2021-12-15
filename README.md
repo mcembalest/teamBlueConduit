@@ -12,7 +12,7 @@ In this project, we investigate the potential for incorporating spatial informat
 
 ## Helpful Links
 
-- [Installation](#Installation-&-Data-Setup)
+- [Installation](#Installation--Data-Setup)
 - [Repository Organization](#Repository-organization)
 - [Broader Impact Assessment](#Broader-Impact-Assessment) ([File](docs/broader_impact_assessment.md))
 
