@@ -11,10 +11,14 @@ Harvard IACS Team: Javiera Astudillo, Max Cembalest, Kevin Hare, and Dashiell Yo
 In this project, we investigate the potential for incorporating spatial information into BlueConduit's baseline machine learning model to predict the location of lead service lines. To do so, we investigate a number of approaches, from naïve inclusion of spatial features to Gaussian Processes and Graph Neural Networks. Ultimately, we show that graph-based nearest-neighbors diffusion provides superior performance, improving the hit rate curve for most neighborhood resolutions and reducing the average cost of replacement of a lead pipe. Further, we investigate possible mechanisms for these results such as providing regularization to the baseline model and locating homes with potentially inaccurate but otherwise predictive features. Finally, we evaluate all of our models at various spatial partitioning resolutions, in terms of both cross-validation as well as aggregation for calculation of the hit rate. This methodology results in overall worse performance across all models but more closely aligns with the real-world scenario of municipalities selecting small areas to investigate rather than working parcel-by-parcel.
 
 ## Helpful Links
-### Documents
-- [Final Technical Report](reports/Technical%20Reports/2021.12.15%20Harvard-BlueConduit%20Technical%20Report.pdf)
-- Blog Post ([In GitHub](reports/Misc/Blog%20Post%20(AC297r%2C%20BlueConduit%20Final%20Project).pdf)), ([Medium](https://medium.com/@youngsaver/using-spatial-information-to-detect-lead-pipes-73a1e68d5643))
+
+- [Installation](#Installation-&-Data-Setup)
+- [Repository Organization](#Repository-organization)
 - [Broader Impact Assessment](#Broader-Impact-Assessment) ([File](docs/broader_impact_assessment.md))
+
+### Documents
+- [Technical Report](reports/Technical%20Reports/2021.12.15%20Harvard-BlueConduit%20Technical%20Report.pdf)
+- Summary Blog Post ([In GitHub](reports/Misc/Blog%20Post%20(AC297r%2C%20BlueConduit%20Final%20Project).pdf)), ([Medium](https://medium.com/@youngsaver/using-spatial-information-to-detect-lead-pipes-73a1e68d5643))
 ### API Reference
 - [Utilities](docs/bcs/utilities.md#API-Reference)
 - [Modeling](docs/bcs/modeling.md)
