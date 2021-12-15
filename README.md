@@ -12,8 +12,8 @@ In this project, we investigate the potential for incorporating spatial informat
 
 ## Helpful Links
 ### Documents
-- [Final Technical Report](reports/Technical%Reports/2021.12.15%Harvard-BlueConduit%Technical%Report.pdf)
-- Blog Post ([In GitHub](reports/Misc/Blog%Post%(AC297r,%BlueConduit Final Project).pdf)), ([Medium](https://medium.com/@youngsaver/using-spatial-information-to-detect-lead-pipes-73a1e68d5643))
+- [Final Technical Report](reports/Technical%20Reports/2021.12.15%20Harvard-BlueConduit%20Technical%20Report.pdf)
+- Blog Post ([In GitHub](reports/Misc/Blog%20Post%20(AC297r%2C%20BlueConduit%20Final%20Project).pdf)), ([Medium](https://medium.com/@youngsaver/using-spatial-information-to-detect-lead-pipes-73a1e68d5643))
 - [Broader Impact Assessment](#Broader-Impact-Assessment) ([File](docs/broader_impact_assessment.md))
 ### API Reference
 - [Utilities](docs/bcs/utilities.md#API-Reference)
