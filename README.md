@@ -15,6 +15,7 @@ In this project, we investigate the potential for incorporating spatial informat
 - [Installation](#Installation--Data-Setup)
 - [Repository Organization](#Repository-organization)
 - [Broader Impact Assessment](#Broader-Impact-Assessment) ([File](docs/broader_impact_assessment.md))
+- [Documentation](docs)
 
 ### Documents
 - [Technical Report](reports/Technical%20Reports/2021.12.15%20Harvard-BlueConduit%20Technical%20Report.pdf)
