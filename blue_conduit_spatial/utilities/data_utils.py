@@ -50,6 +50,16 @@ def get_partitions_builder(data):
     return partitions_builder
 
 def blue_conduit_preprocessing(sl_df, cols_metadata):
+    '''
+    Geopa
+    
+    Args:
+        sl_df: geopandas.geodataframe.GeoDataFrame
+        
+    
+    Returns:
+        partitions_builder: gizmo.spatial_partitions.partitions.partitions_builder 
+    '''
     drop_cols = cols_metadata['drop_cols']
     dummy_cols = cols_metadata['dummy_cols']
     target_cols = cols_metadata['target_cols']
