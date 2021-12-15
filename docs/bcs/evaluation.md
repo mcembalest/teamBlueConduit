@@ -88,9 +88,9 @@ In the plot below, we demonstrate the differences in performance for the Blue Co
 
 ## Generating Costs Curves
 
-This library provides a `CostsHandler` class for calculating costs curves for multiple strategies. Each cost curve plot depicts the costs of removing **x** lead pipes within the test set for a specific `ts` (train size) and `res` (hexagon_resolution) scenario. Costs were calculated following [BlueConduit's previous work](https://storage.googleapis.com/flint-storage-bucket/d4gx_2019%20(2).pdf). That is, every lead pipe removal cost is estimated at $5,000 and every non-lead digging at $3,000. This plot can alternatively be set to depict the costs of removing **p** *share* lead pipes with a `norm_x` argument. Each strategy savings curve is calculated as an average within all test splits for a given train size and hexagon_resolution. Finally, they are smoothed out with a LOWESS (Locally Weighted Scatterplot Smoothing) technique to improve interpretability; the original curve is in light shadow, and the smooth curve is plotted on top of that.
+This library provides a `CostsHandler` class for calculating costs curves for multiple strategies. Each cost curve plot depicts the costs or savings of removing **x** lead pipes within the test set for a specific `ts` (train size) and `res` (hexagon_resolution) scenario. Costs were calculated following [BlueConduit's previous work](https://storage.googleapis.com/flint-storage-bucket/d4gx_2019%20(2).pdf). That is, every lead pipe removal cost is estimated at $5,000 and every non-lead digging at $3,000. This plot can alternatively be set to depict the costs/savings of removing **p** *share* lead pipes with a `norm_x` argument. Savings are calculated with respect to the Blueconduit's baseline model. Each strategy costs/savings curve is calculated as an average within all test splits for a given train size and hexagon_resolution. Finally, they are smoothed out with a LOWESS (Locally Weighted Scatterplot Smoothing) technique to improve interpretability; the original curve is in light shadow, and the smooth curve is plotted on top of that.
 
-Note that the `CostsHandler` does not fit any models but instead expects their predictions for all strategies, hexagon resolutions, and train sizes to be precomputed in a `pred_dir` folder path. Further, if savings are calculated, it requires to know the name of the *baseline* model within the `pred_dir`. 
+Note that the `CostsHandler` does not fit any models but instead expects their predictions for all strategies, hexagon resolutions, and train sizes to be precomputed in a `pred_dir` folder path. Further, if savings are calculated, it requires to know the name of the *baseline* model within the `pred_dir`. Finally, if the metric is set to plot the `savings` curve then the baseline strategy is depicted as a straight line at `x=0` as the baseline has no relative savings with respect to itself.
 
 ### Sample usage
 
@@ -105,16 +105,22 @@ pred_dir = f'{data_dir}/Predictions'
 Xdata, Ydata, location, train_pid, test_pid, partitions_builder = load_datasets(load_dir)
 models_costs = ['baseline', 'diffusion', 'stacking', 'GP_spatiotemporal']
 costs_handler = CostsHandler(Ydata, train_pid, test_pid, partitions_builder, pred_dir, models_costs, bl_prefix='baseline')
-costs_handler.plot_savings(res=22, ts=0.1, norm_x=True)
+costs_handler.plot_costs(res=22, ts=0.1, norm_x=True, metric='savings')
 ```
 
 ![hrc-comparison](../../plots/savings/savings_norm_ts_0.1_n_hex_22.png)
 
 ```
-costs_handler.plot_savings(res=22, ts=0.1, norm_x=False)
+costs_handler.plot_costs(res=22, ts=0.1, norm_x=False, metric='savings')
 ```
 
 ![hrc-comparison](../../plots/savings/savings_ts_0.1_n_hex_22.png)
+
+```
+costs_handler.plot_costs(res=22, ts=0.1, norm_x=True, metric='cost')
+```
+
+![hrc-comparison](../../plots/savings/cost_norm_ts_0.1_n_hex_22.png)
 
 ## API Reference
 
@@ -287,19 +293,16 @@ Note: Most evaluation functions are written to approximate the `sklearn` API for
   | `figname`    | `str`      | optional; None   | Figure filepath / file title (not nec. title of plot)        |
   | `figdir`     | `str`      | optional; None   | Directory to save figure.                                    |
 
-- `CostsHandler.plot_savings(res, ts, savefig=False, norm_x=True, zoom_perc=0.9, plot_dir=None, 
-                             ylim_cum=4e5, ylim_avg=100)`
+- `CostsHandler.plot_savings(res, ts, savefig=False, norm_x=True, zoom_perc=0.9, plot_dir=None, metric='savings')`
 
   Plots savings of each strategy in `CostsHandler` object for a given hexagon resolution and train size scenario.
 
-  | **Argument** | **Type**   | **Status**       | **Description**                                                                              |
-  | ------------ | ---------- | ---------------- | -------------------------------------------------------------------------------------------- |
-  | `res`        | `float`    | required         | Hexagon resolution scenario.                                                                 |
-  | `ts`         | `np.array` | required         | Train size scenario.                                                                         |
-  | `savefig`    | `bool`     | optional; False  | Whether to save the figure. If so, a `plot_dir` is required                                  |
-  | `norm_x`     | `bool`     | optional; True   | Whether to label the x axis as number of lead pipres or share of lead pipes                  |
-  | `zoom_perc`  | `float`    | optional; 0.9    | Whether to cutoff the x axis to the first `zoom_perc`% of lead pipes to improve readability. |
-  | `plot_dir`   | `bool`     | optional; str    | Required if `savefig` is set to `True`                                                       |
-  | `ylim_cum`   | `int`      | optional; 4e5    | Set the limits of the y axis for the cumulative savings plot (left plot).                    |
-  | `ylim_avg`   | `int`      | optional; 100    | Set the limits of the y axis for the average savings plot (right plot).                      |
-  
+  | **Argument** | **Type**   | **Status**          | **Description**                                                                              |
+  | ------------ | ---------- | ------------------- | -------------------------------------------------------------------------------------------- |
+  | `res`        | `float`    | required            | Hexagon resolution scenario.                                                                 |
+  | `ts`         | `np.array` | required            | Train size scenario.                                                                         |
+  | `savefig`    | `bool`     | optional; False     | Whether to save the figure. If so, a `plot_dir` is required                                  |
+  | `norm_x`     | `bool`     | optional; True      | Whether to label the x axis as number of lead pipres or share of lead pipes                  |
+  | `zoom_perc`  | `float`    | optional; 0.9       | Whether to cutoff the x axis to the first `zoom_perc`% of lead pipes to improve readability. |
+  | `plot_dir`   | `bool`     | optional;           | Required if `savefig` is set to `True`                                                       |
+  | `metrics`    | `str`      | optional; 'savings' | Required if `savefig` is set to `True`                                                       |

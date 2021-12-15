@@ -212,12 +212,11 @@ class CostsHandler:
         
         return self.costs
 
-    def plot_savings(self, res, ts, savefig=False, norm_x=True, zoom_perc=0.9, plot_dir=None, 
-                     ylim_cum=4e5, ylim_avg=100):
+    def plot_costs(self, res, ts, savefig=False, norm_x=True, zoom_perc=0.9, plot_dir=None, metric='savings'):
         # If costs for this resolutions and train size haven't been calculated yet, do so.
         costs = None
-        if f'ts_{ts}' in self.dig_data:
-            if f'res_{res}' in self.dig_data[f'ts_{ts}']:
+        if f'ts_{ts}' in self.costs:
+            if f'res_{res}' in self.costs[f'ts_{ts}']:
                 costs = self.costs[f'ts_{ts}'][f'res_{res}']
         
         if costs is None:
@@ -230,19 +229,19 @@ class CostsHandler:
 
         fig, ax = plt.subplots(1,2, figsize=(10,4), dpi=100)
         for i, strategy in enumerate(self.models_prefix):
-            if strategy=='baseline':
+            if metric=='savings' and strategy=='baseline':
                 continue
             color = cmap[i]
             x = np.array(list(range(1,zoom+1)))
             if norm_x:
                 x = 100*x/N
 
-            y = costs[strategy]['savings'][:zoom]
+            y = costs[strategy][f'{metric}'][:zoom]
             lowess = sm.nonparametric.lowess(y, x, frac=0.05) # smooth the curve
             ax[0].plot(x, y, color=color, alpha=0.15)
             ax[0].plot(lowess[:, 0], lowess[:, 1], color=color, label=strategy)
 
-            y_avg = costs[strategy]['savings_avg'][:zoom]
+            y_avg = costs[strategy][f'{metric}_avg'][:zoom]
             lowess = sm.nonparametric.lowess(y_avg, x, frac=0.05) # smooth the curve
             ax[1].plot(x, y_avg, color=color, alpha=0.15)
             ax[1].plot(lowess[:, 0], lowess[:, 1], color=color, label=strategy)
@@ -254,29 +253,32 @@ class CostsHandler:
             ax[0].set_xlabel('Share of removed lead pipes (%)')
             ax[1].xaxis.set_major_formatter(xticks)
             ax[1].set_xlabel('Share of removed lead pipes (%)')
-
-        ax[0].set_ylabel('Cumulative savings ($USD)') 
-        ax[0].axhline(0, color='k', lw=0.5)
-        ax[0].yaxis.set_major_formatter('${x:,.2f}')
-        if ylim_cum:
-            ax[0].set_ylim(-abs(ylim_cum),abs(ylim_cum))
         
-        ax[1].set_ylabel('Average savings/pipe ($USD)')
-        ax[1].axhline(0, color='k', lw=0.5)
+        ax[0].set_ylabel(f'Cumulative {metric} ($USD)')
+        ax[0].yaxis.set_major_formatter('${x:,.2f}')
+        
+        ax[1].set_ylabel(f'Average {metric}/pipe ($USD)')
         ax[1].yaxis.set_major_formatter('${x:,.2f}')
-        if ylim_avg:
-            ax[1].set_ylim(-abs(ylim_avg),abs(ylim_avg))
+        
+        if metric=='savings':
+            ax[0].axhline(0, color='k', lw=0.5)
+            ax[1].axhline(0, color='k', lw=0.5)
+            ax[0].set_ylim(-abs(4e5),abs(4e5))
+            ax[1].set_ylim(-abs(100),abs(100))
             
         lgd = ax[1].legend(loc='upper center', bbox_to_anchor=(-0.15, -0.15),
                   fancybox=True, shadow=False, ncol=4)
-
-        title = f'Savings over Baseline strategy\nHexagon resolution:{res} | Train size:{ts}'
+        
+        if metric=='savings':
+            title = f'Savings over Baseline strategy\nHexagon resolution:{res} | Train size:{ts}'
+        else:
+            title = f'Costs per strategy\nHexagon resolution:{res} | Train size:{ts}'
         title = fig.suptitle(title, y=1.05)
         fig.subplots_adjust(wspace=0.3)
         if savefig:
             if norm_x:
-                savepath = f'{plot_dir}/savings_norm_ts_{ts}_n_hex_{res}.png'
+                savepath = f'{plot_dir}/{metric}_norm_ts_{ts}_n_hex_{res}.png'
             else:
-                savepath = f'{plot_dir}/savings_ts_{ts}_n_hex_{res}.png'
+                savepath = f'{plot_dir}/{metric}_ts_{ts}_n_hex_{res}.png'
             plt.savefig(savepath, dpi=150, bbox_extra_artists=(lgd,title), bbox_inches='tight')
         plt.show()
